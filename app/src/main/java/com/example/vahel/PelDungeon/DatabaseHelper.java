@@ -84,7 +84,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //Datenbank erzeugen
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
-        SQLiteDatabase db = this.getWritableDatabase();
     }
     //Tabelename und die dazugehörigen Attribute erzeugen.
     @Override
