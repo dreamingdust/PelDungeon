@@ -13,26 +13,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8819196b-a3e0-42fd-85e5-76c52d5aa323" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/c2fe0544-d3d3-4ef0-979a-d631d23b1d8b.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/Vahel.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/fileHashes/fileHashes.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.4/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/javaCompile/classAnalysis.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.4/javaCompile/jarAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/javaCompile/jarAnalysis.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/javaCompile/javaCompile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.4/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/javaCompile/taskHistory.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.4/javaCompile/taskJars.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/javaCompile/taskJars.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/taskHistory/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4/taskHistory/taskHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4/taskHistory/taskHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PelDungeon.iml" beforeDir="false" afterPath="$PROJECT_DIR$/PelDungeon.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/DatabaseHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/DatabaseHelper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/SQLiteStatement/SQLiteWeapons.java" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/build/classes/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -87,23 +77,63 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/DatabaseHelper.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="570">
-              <caret line="185" column="17" lean-forward="true" selection-start-line="185" selection-start-column="17" selection-end-line="185" selection-end-column="17" />
+            <state relative-caret-position="1300">
+              <caret line="82" selection-start-line="82" selection-end-line="82" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#3682#3683#0" expanded="true" />
+                <element signature="e#3736#3737#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="uml://JAVA/android.database.sqlite.SQLiteDatabase">
+          <provider selected="true" editor-type-id="UmlEditorProvider">
+            <state>
+              <ID>JAVA</ID>
+              <OriginalElement>android.database.sqlite.SQLiteDatabase</OriginalElement>
+              <nodes>
+                <node x="0.0" y="237.0">android.database.sqlite.SQLiteDatabase</node>
+                <node x="15.5" y="79.0">java.io.Closeable</node>
+                <node x="1.5" y="158.0">android.database.sqlite.SQLiteClosable</node>
+                <node x="2.5" y="0.0">java.lang.AutoCloseable</node>
+              </nodes>
+              <notes />
+              <edges>
+                <edge source="android.database.sqlite.SQLiteDatabase" target="android.database.sqlite.SQLiteClosable">
+                  <point x="0.0" y="-14.5" />
+                  <point x="0.0" y="14.5" />
+                </edge>
+                <edge source="android.database.sqlite.SQLiteClosable" target="java.io.Closeable">
+                  <point x="0.0" y="-14.5" />
+                  <point x="0.0" y="14.5" />
+                </edge>
+                <edge source="java.io.Closeable" target="java.lang.AutoCloseable">
+                  <point x="0.0" y="-14.5" />
+                  <point x="0.0" y="14.5" />
+                </edge>
+              </edges>
+              <settings layout="Hierarchic Group" zoom="1.0" x="-191.5" y="73.0" />
+              <SelectedNodes>
+                <node>android.database.sqlite.SQLiteDatabase</node>
+              </SelectedNodes>
+              <Categories />
+              <SCOPE>All</SCOPE>
+              <VISIBILITY>private</VISIBILITY>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/MainActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
-              <caret line="18" selection-start-line="18" selection-end-line="18" />
+            <state relative-caret-position="442">
+              <caret line="46" column="9" lean-forward="true" selection-start-line="46" selection-start-column="9" selection-end-line="46" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -148,8 +178,8 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/SQLiteStatement/SQLiteInsert.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/SQLiteStatement/SQLiteWeapons.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/WeaponsMelee.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/MainActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/DatabaseHelper.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/MainActivity.java" />
       </list>
     </option>
   </component>
@@ -235,7 +265,7 @@
     <property name="android.profiler.active" value="true" />
     <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1563796358033" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1563888884239" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="JUnit4" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit4" value="" />
     <property name="device.picker.selection" value="Pixel_2_API_29" />
@@ -251,6 +281,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CreateTestDialog.RecentsKey">
+      <recent name="com.example.vahel.PelDungeon" />
       <recent name="com.example.vahel.sqliteapplication" />
     </key>
     <key name="CreateTestDialog.Recents.Supers">
@@ -363,7 +394,8 @@
       <workItem from="1563784206782" duration="7587000" />
       <workItem from="1563792025906" duration="1840000" />
       <workItem from="1563794628670" duration="1126000" />
-      <workItem from="1563795804118" duration="511000" />
+      <workItem from="1563795804118" duration="2843000" />
+      <workItem from="1563886381495" duration="2499000" />
     </task>
     <task id="LOCAL-00001" summary="Version Update">
       <created>1563615298948</created>
@@ -376,7 +408,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="67033000" />
+    <option name="totallyTimeSpent" value="71864000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -403,14 +435,14 @@
       <window_info id="Learn" order="9" weight="0.32980332" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32872504" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49924356" visible="true" weight="0.31643626" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49924356" weight="0.31643626" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.32258064" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32872504" />
       <window_info anchor="bottom" id="Build" order="7" weight="0.21505377" />
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Android Profiler" order="9" weight="0.32872504" />
+      <window_info anchor="bottom" id="Android Profiler" order="9" show_stripe_button="false" weight="0.32872504" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50075644" side_tool="true" weight="0.31797236" />
       <window_info anchor="bottom" id="Logcat" order="11" weight="0.34715822" />
       <window_info anchor="bottom" id="Database Changes" order="12" weight="0.32718894" />
@@ -613,20 +645,58 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/SQLiteStatement/SQLiteWeapons.java" />
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/WeaponsMelee.java" />
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/MainActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="18" selection-start-line="18" selection-end-line="18" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+    <entry file="uml://JAVA/android.database.sqlite.SQLiteDatabase">
+      <provider selected="true" editor-type-id="UmlEditorProvider">
+        <state>
+          <ID>JAVA</ID>
+          <OriginalElement>android.database.sqlite.SQLiteDatabase</OriginalElement>
+          <nodes>
+            <node x="0.0" y="237.0">android.database.sqlite.SQLiteDatabase</node>
+            <node x="15.5" y="79.0">java.io.Closeable</node>
+            <node x="1.5" y="158.0">android.database.sqlite.SQLiteClosable</node>
+            <node x="2.5" y="0.0">java.lang.AutoCloseable</node>
+          </nodes>
+          <notes />
+          <edges>
+            <edge source="android.database.sqlite.SQLiteDatabase" target="android.database.sqlite.SQLiteClosable">
+              <point x="0.0" y="-14.5" />
+              <point x="0.0" y="14.5" />
+            </edge>
+            <edge source="android.database.sqlite.SQLiteClosable" target="java.io.Closeable">
+              <point x="0.0" y="-14.5" />
+              <point x="0.0" y="14.5" />
+            </edge>
+            <edge source="java.io.Closeable" target="java.lang.AutoCloseable">
+              <point x="0.0" y="-14.5" />
+              <point x="0.0" y="14.5" />
+            </edge>
+          </edges>
+          <settings layout="Hierarchic Group" zoom="1.0" x="-191.5" y="73.0" />
+          <SelectedNodes>
+            <node>android.database.sqlite.SQLiteDatabase</node>
+          </SelectedNodes>
+          <Categories />
+          <SCOPE>All</SCOPE>
+          <VISIBILITY>private</VISIBILITY>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/DatabaseHelper.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="570">
-          <caret line="185" column="17" lean-forward="true" selection-start-line="185" selection-start-column="17" selection-end-line="185" selection-end-column="17" />
+        <state relative-caret-position="1300">
+          <caret line="82" selection-start-line="82" selection-end-line="82" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#3682#3683#0" expanded="true" />
+            <element signature="e#3736#3737#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/vahel/PelDungeon/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="46" column="9" lean-forward="true" selection-start-line="46" selection-start-column="9" selection-end-line="46" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

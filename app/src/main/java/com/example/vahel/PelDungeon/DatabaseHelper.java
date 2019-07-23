@@ -1,10 +1,3 @@
-/*
-* Vahel Hassan
-* SQLite
-* Datenbank für das Spiel Pixeldungeon
-* Tabellen: Weapons, Armors, Rings, Wands, Potions, Scrolls, and Other Items.
-* */
-
 package com.example.vahel.PelDungeon;
 
 import android.content.ContentValues;
@@ -12,10 +5,17 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+/**
+ *
+ * @author Vahel
+ * @version 1.0.
+ */
 public class DatabaseHelper extends SQLiteOpenHelper {
+
+     //Datenbankname wird festgelegt.
     public final static String DATABASE_NAME = "Items.db";
     /*-----------------------------------------------WEAPONS-----------------------------------------------*/
-    /* Tabelle für Weapons erzeugen: Weapons Melee */
+    //Tabellename und Attribute für Weapons Melee wird festgelegt.
     public final static String TABLE_MELEE = "weapons_melee";
     public final static String COL_1 = "ID";
     public final static String COL_2 = "NAME";
@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public final static String COL_4 = "ACCURACY";
     public final static String COL_5 = "DELAY";
 
-    /* Tabelle für Weapons erzeugen: Weapons Melee */
+    //Tabellename und Attribute für Weapons Missile wird festgelegt.
     public final static String TABLE_MISSILE = "weapons_missile";
     public final static String COL_6 = "ID";
     public final static String COL_7 = "NAME";
@@ -32,12 +32,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public final static String COL_10 = "ACCURACY";
     public final static String COL_11 = "DELAY";
 
-    /* Tabelle für Weapons erzeugen: Weapons Enchantments */
+    //Tabellename und Attribute für Weapons Enchantments wird festgelegt.
     public final static String TABLE_ENCHANTMENTS = "weapons_enchantments";
     public final static String COL_12 = "ID";
     public final static String COL_13 = "NAME";
     /*-----------------------------------------------ARMORS-----------------------------------------------*/
-    /* Tabelle für Armors erzeugen*/
+    //Tabellename und Attribute für Armor wird festgelegt.
     public final static String TABLE_ARMORS = "all_armors";
     public final static String COL_14 = "ID";
     public final static String COL_15 = "NAME";
@@ -46,7 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public final static String COL_18 = "ARMOR";
     public final static String COL_19 = "EFFECTIVE_ABSORPTION";
     /*-----------------------------------------------RINGS-----------------------------------------------*/
-    /* Tabelle für Rings erzeugen*/
+    //Tabellename und Attribute für Rings wird festgelegt.
     public final static String TABLE_RINGS = "all_rings";
     public final static String COL_20 = "ID";
     public final static String COL_21 = "NAME";
@@ -56,7 +56,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public final static String COL_25 = "DURATION_REDUCTION_FACTOR";
     public final static String COL_26 = "RESISTENCE_PROBABILITY";
     /*-----------------------------------------------WANDS-----------------------------------------------*/
-    /* Tabelle für Wands erzeugen*/
+    //Tabellename und Attribute für Weapons Wands wird festgelegt.
     public final static String TABLE_WANDS = "all_wands";
     public final static String COL_27 = "ID";
     public final static String COL_28 = "NAME";
@@ -66,28 +66,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public final static String COL_32 = "MAX";
     public final static String COL_33 = "AVG";
     /*-----------------------------------------------POTIONS-----------------------------------------------*/
-    /* Tabelle für Potions erzeugen*/
+    //Tabellename und Attribute für Potions wird festgelegt.
     public final static String TABLE_POTIONS = "all_potions";
     public final static String COL_34 = "ID";
     public final static String COL_35 = "NAME";
     /*-----------------------------------------------Scroll-----------------------------------------------*/
-    /* Tabelle für Scrolls erzeugen*/
+    //Tabellename und Attribute für  Scrolls wird festgelegt.
     public final static String TABLE_SCROLLS = "all_scrolls";
     public final static String COL_36 = "ID";
     public final static String COL_37 = "NAME";
     /*-----------------------------------------------Other Items-----------------------------------------------*/
-    /* Tabelle für Other Items erzeugen*/
+    //Tabellename und Attribute für  Other Items wird festgelegt.
     public final static String TABLE_OTHERITEMS = "all_otheritems";
     public final static String COL_38 = "ID";
     public final static String COL_39 = "NAME";
 
-
-    //Datenbank erzeugen
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
     }
 
-    //Tabelename und die dazugehörigen Attribute erzeugen.
+    /**
+     *
+     * @param db Wird benötigt, um execSQL auszuführen und dadurch dann Tebelle mit den jeweligen Attributen zu erzeugen.
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_MELEE + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT, BASE_STRENGTH INTEGER, ACCURACY INTEGER, DELAY REAL)");
@@ -100,7 +101,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("create table " + TABLE_SCROLLS + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT)");
         db.execSQL("create table " + TABLE_OTHERITEMS + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT)");
     }
-    //Dublikate löschen.
+
+    /**
+     *
+     * @param db Wird benötigt, um execSQLI auszuführen und dadurch dann Tabellen die nicht mehr verwendet werden zu löschen.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MELEE);
@@ -114,7 +119,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-
+    /**
+     *
+     * @param name Wird benötigt, damit wir den Attribute dann mit einem Wert zu füllen.
+     * @param base_strength Wird benötigt, damit wir den Attribute dann mit einem Wert zu füllen.
+     * @param accuracy benötigt, damit wir den Attribute dann mit einem Wert zu füllen.
+     * @param delay Wird benötigt, damit wir den Attribute dann mit einem Wert zu füllen.
+     * @return false oder true
+     */
     public boolean insertFortMelee(String name, Integer base_strength, Integer accuracy, Double delay) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -132,8 +144,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     /**
      *
-     * @param DeleteDublicatForMelee
-     * @return dublicate in Zeilen löschen.
+     * @param id Der Tring wird benötigt, weil wir ein Integer zurückgeben müssen.
+     * @return Integer die leer ist.
      */
     public Integer deleteDublicateForMelee(String id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -142,8 +154,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     /**
      *
-     * @param DeleteDublicatForMissile
-     * @return dublicate in Zeilen löschen.
+     * @param id Der Tring wird benötigt, weil wir ein Integer zurückgeben müssen.
+     * @return Integer die leer ist.
      */
     public Integer deleteDuplicateForMissile(String id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -152,8 +164,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     /**
      *
-     * @param DeleteDublicatForRings
-     * @return dublicate in Zeilen löschen.
+     * @param id Der Tring wird benötigt, weil wir ein Integer zurückgeben müssen.
+     * @return Integer die leer ist.
      */
     public Integer deleteDublicatForRings(String id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -162,8 +174,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     /**
      *
-     * @param DeleteDublicatForWands
-     * @return dublicate in Zeilen löschen.
+     * @param id Der Tring wird benötigt, weil wir ein Integer zurückgeben müssen.
+     * @return Integer die leer ist.
      */
     public Integer deleteDublicatForWands(String id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -172,8 +184,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     /**
      *
-     * @param DeleteDublicatForScrolls
-     * @return dublicate in Zeilen löschen.
+     * @param id Der Tring wird benötigt, weil wir ein Integer zurückgeben müssen.
+     * @return Integer die leer ist.
      */
     public Integer deleteDublicatForScrolls(String id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -182,8 +194,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     /**
      *
-     * @param DeleteDublicatForOtherItems
-     * @return dublicate in Zeilen löschen.
+     * @param id Der Tring wird benötigt, weil wir ein Integer zurückgeben müssen.
+     * @return Integer die leer ist.
      */
     public Integer deleteDublicatForOtherItems(String id) {
         SQLiteDatabase db = this.getWritableDatabase();
