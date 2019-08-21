@@ -1,43 +1,45 @@
 package com.ema.game.controller;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.ema.game.components.BodyComponent;
 
 public class TouchController extends ApplicationAdapter implements InputProcessor {
-    // we will use 32px/unit in world
-    public final static float SCALE = 32f;
-    public final static float INV_SCALE = 1.f/SCALE;
-    // this is our "target" resolution, not that the window can be any size, it is not bound to this one
-    public final static float VP_WIDTH = 1280 * INV_SCALE;
-    public final static float VP_HEIGHT = 720 * INV_SCALE;
+    private static final int DIRECTION_LEFT = 1;
+    private static final int DIRECTION_RIGHT = 2;
+    private static final int DIRECTION_UP = 3;
+    private static final int DIRECTION_DOWN = 4;
+    private static final int DIRECTION_NONE = 0;
+
+    int direction;
 
     Vector2 mousePos;
 
     private OrthographicCamera camera;
-    private Body player;
+    private Entity player;
     private Array<Body> mapTiles;
     private ExtendViewport viewport;
     private ShapeRenderer shapes;
 
     private boolean canMove;
 
-    public TouchController(OrthographicCamera camera, Body player, Array<Body> mapTiles) {
+    public TouchController(OrthographicCamera camera, Entity player, Array<Body> mapTiles) {
         mousePos = new Vector2(0, 0);
         this.camera = camera;
         this.player = player;
         this.mapTiles = mapTiles;
         canMove = true;
+        direction = DIRECTION_NONE;
 
     }
 
@@ -59,71 +61,46 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
                 screenX <= Gdx.graphics.getWidth() - Gdx.graphics.getWidth()/4 &&
                 screenY <= Gdx.graphics.getHeight()/2) {
 
+            direction = DIRECTION_UP;
             for (Body tile : mapTiles) {
-                if (tile.getFixtureList().get(0).testPoint(player.getPosition().x, player.getPosition().y + 0.32f)) {
-                    canMove = false;
+                if (tile.getFixtureList().get(0).testPoint(player.getComponent(BodyComponent.class).body.getPosition().x, player.getComponent(BodyComponent.class).body.getPosition().y + 0.32f)) {
+                    direction = DIRECTION_NONE;
                 }
             }
-
-            if (canMove) {
-                player.setTransform(player.getPosition().x, player.getPosition().y + 0.32f, 0);
-            } else {
-                canMove = true;
-            }
-
         }
         else if(screenX >= Gdx.graphics.getWidth()/4 &&
                 screenX <= Gdx.graphics.getWidth() - Gdx.graphics.getWidth()/4 &&
                 screenY >= Gdx.graphics.getHeight()/2) {
 
+            direction = DIRECTION_DOWN;
             for (Body tile : mapTiles) {
-                if (tile.getFixtureList().get(0).testPoint(player.getPosition().x, player.getPosition().y - 0.32f)) {
-                    canMove = false;
+                if (tile.getFixtureList().get(0).testPoint(player.getComponent(BodyComponent.class).body.getPosition().x, player.getComponent(BodyComponent.class).body.getPosition().y - 0.32f)) {
+                    direction = DIRECTION_NONE;
                 }
             }
-
-            if (canMove) {
-                player.setTransform(player.getPosition().x, player.getPosition().y - 0.32f, 0);
-            } else {
-                canMove = true;
-            }
-
         }
         else if(screenX >= Gdx.graphics.getWidth()/2 &&
                 screenY >= Gdx.graphics.getHeight()/4 &&
                 screenY <= Gdx.graphics.getHeight() - Gdx.graphics.getHeight()/4 ) {
 
+            direction = DIRECTION_RIGHT;
             for (Body tile : mapTiles) {
-                if (tile.getFixtureList().get(0).testPoint(player.getPosition().x + 0.32f, player.getPosition().y)) {
-                    canMove = false;
+                if (tile.getFixtureList().get(0).testPoint(player.getComponent(BodyComponent.class).body.getPosition().x + 0.32f, player.getComponent(BodyComponent.class).body.getPosition().y)) {
+                    direction = DIRECTION_NONE;
                 }
-            }
-
-            if (canMove) {
-                player.setTransform(player.getPosition().x + 0.32f, player.getPosition().y, 0);
-            } else {
-                canMove = true;
             }
         }
         else if(screenX <= Gdx.graphics.getWidth()/2 &&
                 screenY >= Gdx.graphics.getHeight()/4 &&
                 screenY <= Gdx.graphics.getHeight() - Gdx.graphics.getHeight()/4 ) {
 
+            direction = DIRECTION_LEFT;
             for (Body tile : mapTiles) {
-                if (tile.getFixtureList().get(0).testPoint(player.getPosition().x - 0.32f, player.getPosition().y)) {
-                    canMove = false;
+                if (tile.getFixtureList().get(0).testPoint(player.getComponent(BodyComponent.class).body.getPosition().x - 0.32f, player.getComponent(BodyComponent.class).body.getPosition().y)) {
+                    direction = DIRECTION_NONE;
                 }
             }
-
-            if (canMove) {
-                player.setTransform(player.getPosition().x - 0.32f, player.getPosition().y, 0);
-            } else {
-                canMove = true;
-            }
         }
-
-
-//        System.out.println("Controller zoom " + camera.zoom);
         return true;
     }
 
@@ -141,7 +118,7 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         if (button != Input.Buttons.LEFT || pointer > 0) return false;
         camera.unproject(tp.set(screenX, screenY, 0));
         dragging = false;
-        player.setLinearVelocity(0, 0);
+        player.getComponent(BodyComponent.class).body.setLinearVelocity(0, 0);
         return true;
     }
 
@@ -175,12 +152,15 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         return true;
     }
 
+    public int getMovementDirection() {
+        return direction;
+    }
+
+    public void setMovementDirection(int direction) {
+        this.direction = direction;
+    }
 
     public OrthographicCamera getCamera (){
         return camera;
-    }
-
-    public Body getPlayer () {
-        return player;
     }
 }

@@ -39,10 +39,13 @@ public class MenuScreen implements Screen{
 
         //create buttons
         TextButton newGame = new TextButton("New Dungeon", skin);
+        TextButton chooseHero = new TextButton("Choose Hero", skin);
         TextButton exit = new TextButton("Exit", skin);
 
         //add buttons to table
         table.add(newGame).fillX().uniformX();
+        table.row().pad(10, 0, 10, 0);
+        table.add(chooseHero).fillX().uniformX();
         table.row().pad(10, 0, 10, 0);
         table.add(exit).fillX().uniformX();
 
@@ -58,6 +61,13 @@ public class MenuScreen implements Screen{
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 parent.changeScreen(Dungeon.APPLICATION);
+            }
+        });
+
+        chooseHero.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                parent.changeScreen(Dungeon.CHOOSE_HERO);
             }
         });
 
