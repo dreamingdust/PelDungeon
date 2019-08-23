@@ -1,6 +1,8 @@
 package com.ema.game.screens;
 
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -22,8 +24,10 @@ import com.ema.game.Dungeon;
 import com.ema.game.GameAssetManager;
 import com.ema.game.MapBodyBuilder;
 import com.ema.game.components.BodyComponent;
-import com.ema.game.components.PlayerComponent;
+import com.ema.game.components.EnemyComponent;
+import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.TextureComponent;
+import com.ema.game.components.TypeComponent;
 import com.ema.game.controller.TouchController;
 import com.ema.game.systems.MovementSystem;
 
@@ -43,49 +47,23 @@ public class MainScreen implements Screen {
     private final SpriteBatch batch;
     private final MapBodyBuilder mapBodyBuilder;
     private final World world;
-    private Body player;
-    private Array<Body> mapTiles;
-    private Array<Body> groundTiles;
+//    private Array<Body> mapTiles;
+//    private Array<Body> groundTiles;
     private Array<Body> mapDoors;
 
     private PooledEngine engine;
     private Entity playerEntity;
+    private Array<Entity> enemyEntities;
+    private Array<Entity> objectEntities;
+    private Array<Entity> groundEntities;
+    private ComponentMapper<BodyComponent> bodyMapper;
+    private ComponentMapper<TextureComponent> textureMapper;
 
-
-    private Texture playerTexture;
     private Texture wallTexture;
     private Texture groundTexture;
     private Texture doorTexture;
 
-    private int tileWidth, tileHeight,
-            mapWidthInTiles, mapHeightInTiles,
-            mapWidthInPixels, mapHeightInPixels;
-
     public MainScreen(Dungeon game) {
-//
-//        parent = game;
-//
-//
-//
-//        camera = new OrthographicCamera();
-//
-//        map = new TmxMapLoader().load("map/first_level.tmx");
-//
-//        MapProperties properties = map.getProperties();
-//        tileWidth         = properties.get("tilewidth", Integer.class);
-//        tileHeight        = properties.get("tileheight", Integer.class);
-//        mapWidthInTiles   = properties.get("width", Integer.class);
-//        mapHeightInTiles  = properties.get("height", Integer.class);
-//        mapWidthInPixels  = mapWidthInTiles  * tileWidth;
-//        mapHeightInPixels = mapHeightInTiles * tileHeight;
-////
-////        camera.position.x = mapWidthInPixels * .5f;
-////        camera.position.y = mapHeightInPixels * .35f;
-//
-//        camera.zoom = 20f;
-//
-//        renderer = new OrthogonalTiledMapRenderer(map);
-
 
         parent = game;
         assetManager = new GameAssetManager();
@@ -98,9 +76,16 @@ public class MainScreen implements Screen {
         mapBodyBuilder = new MapBodyBuilder(world, engine);
         camera.zoom = 0.4f;
 
+        assetManager.queueAddImages();
+        assetManager.manager.finishLoading();
 
+        objectEntities = mapBodyBuilder.createWalls();
+        groundEntities = mapBodyBuilder.createGround();
         playerEntity = mapBodyBuilder.createPlayer();
+        enemyEntities = mapBodyBuilder.createEnemies();
 
+        bodyMapper = ComponentMapper.getFor(BodyComponent.class);
+        textureMapper = ComponentMapper.getFor(TextureComponent.class);
 
 
 
@@ -113,21 +98,30 @@ public class MainScreen implements Screen {
 
 
 
-        assetManager.queueAddImages();
-        assetManager.manager.finishLoading();
-
-
-        player = mapBodyBuilder.getPlayer();
-//        camera.position.set(player.getPosition(), 0);
-
-        mapTiles = mapBodyBuilder.getMapTiles();
-        groundTiles = mapBodyBuilder.getGroundTiles();
+//        mapTiles = mapBodyBuilder.getMapTiles();
+//        groundTiles = mapBodyBuilder.getGroundTiles();
         mapDoors = mapBodyBuilder.getDoors();
 
 
-        Body startTile = groundTiles.get(rand.nextInt(groundTiles.size));
-        playerEntity.getComponent(BodyComponent.class).body.setTransform(startTile.getPosition().x, startTile.getPosition().y, 0);
+        Entity startTile = groundEntities.get(rand.nextInt(groundEntities.size));
+
+//        playerEntity.getComponent(BodyComponent.class).body.setTransform(startTile.getComponent(BodyComponent.class).body.getPosition(), 0);
+        bodyMapper.get(playerEntity).body.setTransform(startTile.getComponent(BodyComponent.class).body.getPosition(), 0);
+
         playerEntity.getComponent(TextureComponent.class).texture = assetManager.manager.get("images/human_m.png");
+
+        for (Entity enemy : enemyEntities) {
+//            enemy.getComponent(BodyComponent.class).body.setTransform(groundEntities.get(rand.nextInt(groundEntities.size)).getComponent(BodyComponent.class).body.getPosition(), 0);
+            bodyMapper.get(enemy).body.setTransform(groundEntities.get(rand.nextInt(groundEntities.size)).getComponent(BodyComponent.class).body.getPosition(), 0);
+            enemy.getComponent(TextureComponent.class).texture = assetManager.manager.get("images/grey_rat.png");
+        }
+
+        for (Entity object : objectEntities) {
+            textureMapper.get(object).texture = assetManager.manager.get("images/brick_gray0.png");
+        }
+        for (Entity ground : groundEntities) {
+            textureMapper.get(ground).texture = assetManager.manager.get("images/cobble_blood3.png");
+        }
 
         camera.position.set(playerEntity.getComponent(BodyComponent.class).body.getPosition(), 0);
 
@@ -136,26 +130,15 @@ public class MainScreen implements Screen {
 
 
 
-        controller = new TouchController(camera, playerEntity, mapTiles);
+//        controller = new TouchController(camera, playerEntity, mapTiles);
+        controller = new TouchController(camera, playerEntity, engine);
         Gdx.input.setInputProcessor(controller);
 
 
-        engine.addSystem(new MovementSystem(controller));
+        engine.addSystem(new MovementSystem(controller, engine));
 
 
-
-        playerTexture = assetManager.manager.get("images/human_m.png");
-        wallTexture = assetManager.manager.get("images/brick_gray0.png");
-        groundTexture = assetManager.manager.get("images/cobble_blood3.png");
         doorTexture = assetManager.manager.get("images/dngn_closed_door.png");
-
-        player.setUserData(playerTexture);
-        for (Body tile : mapTiles) {
-            tile.setUserData(wallTexture);
-        }
-        for (Body ground : groundTiles) {
-            ground.setUserData(groundTexture);
-        }
         for (Body door : mapDoors) {
             door.setUserData(doorTexture);
         }
@@ -176,19 +159,46 @@ public class MainScreen implements Screen {
 
         batch.begin();
 //        mapTiles.forEach((tile) -> batch.draw(wallTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, 0.3f, 0.3f));
-        for (Body tile : mapTiles) {
-            batch.draw(wallTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, 0.3f, 0.3f);
-//            batch.draw(wallTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, tile.getFixtureList().get(0).getUserData(), 0.3f);
+//        for (Body tile : mapTiles) {
+//            batch.draw(wallTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, 0.3f, 0.3f);
+////            batch.draw(wallTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, tile.getFixtureList().get(0).getUserData(), 0.3f);
+//        }
+//        for (Body tile : groundTiles) {
+//            batch.draw(groundTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, 0.3f, 0.3f);
+//        }
+//        for (Body tile : mapDoors) {
+//            batch.draw(doorTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, 0.3f, 0.3f);
+//        }
+//        for (Entity object : objectEntities) {
+//            batch.draw(textureMapper.get(object).texture,
+//                    object.getComponent(BodyComponent.class).body.getPosition().x - 0.15f,
+//                    object.getComponent(BodyComponent.class).body.getPosition().y - 0.15f, 0.3f, 0.3f);
+//        }
+//        for (Entity ground : groundEntities) {
+//            batch.draw(ground.getComponent(TextureComponent.class).texture,
+//                    ground.getComponent(BodyComponent.class).body.getPosition().x - 0.15f,
+//                    ground.getComponent(BodyComponent.class).body.getPosition().y - 0.15f, 0.3f, 0.3f);
+//        }
+//        batch.draw(playerEntity.getComponent(TextureComponent.class).texture,
+//                playerEntity.getComponent(BodyComponent.class).body.getPosition().x - 0.15f,
+//                playerEntity.getComponent(BodyComponent.class).body.getPosition().y - 0.15f, 0.3f, 0.3f);
+//
+//        for (Entity enemy : enemyEntities) {
+//            batch.draw(enemy.getComponent(TextureComponent.class).texture,
+//                    enemy.getComponent(BodyComponent.class).body.getPosition().x - 0.15f,
+//                    enemy.getComponent(BodyComponent.class).body.getPosition().y - 0.15f, 0.3f, 0.3f);
+//        }
+
+        Family renderFamily = Family.all(TextureComponent.class).get();
+
+        for (Entity object : engine.getEntitiesFor(renderFamily)) {
+            batch.draw(textureMapper.get(object).texture,
+                    bodyMapper.get(object).body.getPosition().x - 0.15f,
+                    bodyMapper.get(object).body.getPosition().y - 0.15f, 0.3f, 0.3f);
         }
-        for (Body tile : groundTiles) {
-            batch.draw(groundTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, 0.3f, 0.3f);
-        }
-        for (Body tile : mapDoors) {
-            batch.draw(doorTexture, tile.getPosition().x - 0.15f, tile.getPosition().y - 0.15f, 0.3f, 0.3f);
-        }
-        batch.draw(playerEntity.getComponent(TextureComponent.class).texture,
-                playerEntity.getComponent(BodyComponent.class).body.getPosition().x - 0.15f,
-                playerEntity.getComponent(BodyComponent.class).body.getPosition().y - 0.15f, 0.3f, 0.3f);
+
+
+
 
         batch.end();
 
@@ -202,7 +212,7 @@ public class MainScreen implements Screen {
         world.step(delta, 6, 2);
         batch.setProjectionMatrix(camera.combined);
 
-        box2DDebugRenderer.render(world, camera.combined);
+//        box2DDebugRenderer.render(world, camera.combined);
     }
 
     @Override

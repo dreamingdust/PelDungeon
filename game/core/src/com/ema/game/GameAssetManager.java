@@ -14,6 +14,7 @@ public class GameAssetManager {
     public final String wallImage = "images/brick_gray0.png";
     public final String groundImage = "images/cobble_blood3.png";
     public final String doorImage = "images/dngn_closed_door.png";
+    public final String ratImage = "images/grey_rat.png";
     //public final String enemyImage = "images/enemy.png";
 
     public void queueAddImages(){
@@ -21,6 +22,7 @@ public class GameAssetManager {
         manager.load(wallImage, Texture.class);
         manager.load(groundImage, Texture.class);
         manager.load(doorImage, Texture.class);
+        manager.load(ratImage, Texture.class);
         //manager.load(enemyImage, Texture.class);
     }
 }
