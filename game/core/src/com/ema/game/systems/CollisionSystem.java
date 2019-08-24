@@ -28,32 +28,34 @@ public class CollisionSystem extends IteratingSystem {
         collisionMapper = ComponentMapper.getFor(CollisionComponent.class);
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
         objects = engine.getEntitiesFor(Family.all(MapObjectComponent.class).get());
-        entities = engine.getEntitiesFor(Family.all(PlayerComponent.class).get());
-        this.updateCollision(entities.get(0));
+        entities = engine.getEntitiesFor(Family.all(CollisionComponent.class).get());
+        this.updateCollision();
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
     }
 
-    public void updateCollision(Entity entity) {
-        collisionMapper.get(entity).collision_up = false;
-        collisionMapper.get(entity).collision_down = false;
-        collisionMapper.get(entity).collision_right = false;
-        collisionMapper.get(entity).collision_left = false;
+    public void updateCollision() {
+        for (Entity entity : entities) {
+            collisionMapper.get(entity).collision_up = false;
+            collisionMapper.get(entity).collision_down = false;
+            collisionMapper.get(entity).collision_right = false;
+            collisionMapper.get(entity).collision_left = false;
 
-        for (Entity object : objects) {
-            if (bodyMapper.get(object).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition().x, bodyMapper.get(entity).body.getPosition().y + 0.32f)) {
-                collisionMapper.get(entity).collision_up = true;
-            }
-            if (bodyMapper.get(object).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition().x, bodyMapper.get(entity).body.getPosition().y - 0.32f)) {
-                collisionMapper.get(entity).collision_down = true;
-            }
-            if (bodyMapper.get(object).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition().x + 0.32f, bodyMapper.get(entity).body.getPosition().y)) {
-                collisionMapper.get(entity).collision_right = true;
-            }
-            if (bodyMapper.get(object).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition().x - 0.32f, bodyMapper.get(entity).body.getPosition().y)) {
-                collisionMapper.get(entity).collision_left = true;
+            for (Entity object : objects) {
+                if (bodyMapper.get(object).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition().x, bodyMapper.get(entity).body.getPosition().y + 0.32f)) {
+                    collisionMapper.get(entity).collision_up = true;
+                }
+                if (bodyMapper.get(object).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition().x, bodyMapper.get(entity).body.getPosition().y - 0.32f)) {
+                    collisionMapper.get(entity).collision_down = true;
+                }
+                if (bodyMapper.get(object).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition().x + 0.32f, bodyMapper.get(entity).body.getPosition().y)) {
+                    collisionMapper.get(entity).collision_right = true;
+                }
+                if (bodyMapper.get(object).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition().x - 0.32f, bodyMapper.get(entity).body.getPosition().y)) {
+                    collisionMapper.get(entity).collision_left = true;
+                }
             }
         }
     }

@@ -5,27 +5,32 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.ema.game.components.BodyComponent;
+import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.EnemyComponent;
-import com.ema.game.components.MovementComponent;
 import com.ema.game.components.PlayerComponent;
 import com.ema.game.controller.TouchController;
 
 import java.util.Random;
 
 public class MovementSystem extends IteratingSystem {
-    TouchController controller;
-    PooledEngine engine;
-    public boolean moveTaken;
-    Random rand;
-
     private static final int DIRECTION_LEFT = 1;
     private static final int DIRECTION_RIGHT = 2;
     private static final int DIRECTION_UP = 3;
     private static final int DIRECTION_DOWN = 4;
     private static final int DIRECTION_NONE = 0;
 
+    TouchController controller;
+    PooledEngine engine;
+    ImmutableArray<Entity> enemies;
+
+    public boolean moveTaken;
+    Random rand;
+
+
     private ComponentMapper<BodyComponent> bodyMapper;
+    private ComponentMapper<CollisionComponent> collisionMapper;
 
     private int direction;
 
@@ -35,6 +40,8 @@ public class MovementSystem extends IteratingSystem {
         this.engine = engine;
 
         bodyMapper = ComponentMapper.getFor(BodyComponent.class);
+        collisionMapper = ComponentMapper.getFor(CollisionComponent.class);
+        enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
 
         rand = new Random(System.currentTimeMillis());
         direction = DIRECTION_NONE;
@@ -42,10 +49,6 @@ public class MovementSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-
-//        TODO: Refactor the movement system using the MovementComponent
-//        TODO: Create a CollisionSystem
-
 
         direction = controller.getMovementDirection();
 
@@ -61,22 +64,45 @@ public class MovementSystem extends IteratingSystem {
             }
             controller.setMovementDirection(DIRECTION_NONE);
             moveTaken = true;
-            engine.getSystem(CollisionSystem.class).updateCollision(entity);
+            engine.getSystem(CollisionSystem.class).updateCollision();
         } else {
             moveTaken = false;
         }
 
 
         if (moveTaken) {
+            int enemy_direction;
+            int num;
 
-            for (Entity enemy : engine.getEntitiesFor(Family.all(EnemyComponent.class).get())) {
-                rand.nextInt();
+            for (Entity enemy : enemies) {
+                num = rand.nextInt(4);
+                switch (num) {
+                    case 1:
+                        enemy_direction = DIRECTION_LEFT;
+                        break;
+                    case 2:
+                        enemy_direction = DIRECTION_RIGHT;
+                        break;
+                    case 3:
+                        enemy_direction = DIRECTION_UP;
+                        break;
+                    case 4:
+                        enemy_direction = DIRECTION_DOWN;
+                        break;
+                    default:
+                        enemy_direction = DIRECTION_NONE;
+                }
+
+                if (enemy_direction == DIRECTION_LEFT && !collisionMapper.get(enemy).collision_left) {
+                    bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x - 0.32f, bodyMapper.get(enemy).body.getPosition().y, 0);
+                } else if (enemy_direction == DIRECTION_RIGHT && !collisionMapper.get(enemy).collision_right) {
+                    bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x + 0.32f, bodyMapper.get(enemy).body.getPosition().y, 0);
+                } else if (enemy_direction == DIRECTION_DOWN && !collisionMapper.get(enemy).collision_down) {
+                    bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x, bodyMapper.get(enemy).body.getPosition().y - 0.32f, 0);
+                } else if (enemy_direction == DIRECTION_UP && !collisionMapper.get(enemy).collision_up) {
+                    bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x, bodyMapper.get(enemy).body.getPosition().y + 0.32f, 0);
+                }
             }
         }
-
-    }
-
-    public void collisionCheck(Entity entity) {
-
     }
 }
