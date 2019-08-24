@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.ema.game.components.BodyComponent;
+import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.EnemyComponent;
 import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.MapObjectComponent;
@@ -85,6 +86,7 @@ public class MapBodyBuilder implements Disposable {
         PlayerComponent player = engine.createComponent(PlayerComponent.class);
         TypeComponent type = engine.createComponent(TypeComponent.class);
         MovementComponent movement = engine.createComponent(MovementComponent.class);
+        CollisionComponent collision = engine.createComponent(CollisionComponent.class);
 
         final Rectangle rectangle = map.getLayers().get(MAP_PLAYER).getObjects().getByType(RectangleMapObject.class).get(0).getRectangle();
 
@@ -104,6 +106,7 @@ public class MapBodyBuilder implements Disposable {
         entity.add(player);
         entity.add(type);
         entity.add(movement);
+        entity.add(collision);
 
         engine.addEntity(entity);
         return entity;
@@ -123,6 +126,7 @@ public class MapBodyBuilder implements Disposable {
             TextureComponent texture = engine.createComponent(TextureComponent.class);
             TypeComponent type = engine.createComponent(TypeComponent.class);
             MovementComponent movement = engine.createComponent(MovementComponent.class);
+            CollisionComponent collision = engine.createComponent(CollisionComponent.class);
 
             body.body = bodyFactory.makeBoxPolyBody(
                     new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
@@ -140,6 +144,7 @@ public class MapBodyBuilder implements Disposable {
             entity.add(enemy);
             entity.add(type);
             entity.add(movement);
+            entity.add(collision);
 
             enemyEntities.add(entity);
             engine.addEntity(entity);

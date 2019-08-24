@@ -29,6 +29,7 @@ import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.TextureComponent;
 import com.ema.game.components.TypeComponent;
 import com.ema.game.controller.TouchController;
+import com.ema.game.systems.CollisionSystem;
 import com.ema.game.systems.MovementSystem;
 
 import java.util.Random;
@@ -134,6 +135,7 @@ public class MainScreen implements Screen {
         controller = new TouchController(camera, playerEntity, engine);
         Gdx.input.setInputProcessor(controller);
 
+        engine.addSystem(new CollisionSystem(engine));
 
         engine.addSystem(new MovementSystem(controller, engine));
 

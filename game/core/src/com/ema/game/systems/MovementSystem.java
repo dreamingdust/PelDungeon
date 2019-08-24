@@ -61,6 +61,7 @@ public class MovementSystem extends IteratingSystem {
             }
             controller.setMovementDirection(DIRECTION_NONE);
             moveTaken = true;
+            engine.getSystem(CollisionSystem.class).updateCollision(entity);
         } else {
             moveTaken = false;
         }
@@ -71,7 +72,6 @@ public class MovementSystem extends IteratingSystem {
             for (Entity enemy : engine.getEntitiesFor(Family.all(EnemyComponent.class).get())) {
                 rand.nextInt();
             }
-            System.out.println(moveTaken);
         }
 
     }
