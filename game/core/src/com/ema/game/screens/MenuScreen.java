@@ -1,5 +1,9 @@
 package com.ema.game.screens;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.ema.game.Dungeon;
 
 import com.badlogic.gdx.Gdx;
@@ -17,6 +21,7 @@ public class MenuScreen implements Screen{
 
     private Dungeon parent;
     private Stage stage;
+    private Skin skin;
 
     public MenuScreen(Dungeon game){
         parent = game;
@@ -31,23 +36,29 @@ public class MenuScreen implements Screen{
         // Create a table that fills the screen. Everything else will go inside this table.
         Table table = new Table();
         table.setFillParent(true);
-        table.setDebug(true);
+        Texture bg = parent.assetManager.manager.get("images/stone_gray2.png");
+
+        table.background(new TiledDrawable(new TextureRegion(bg)));
+//        table.setDebug(true);
         stage.addActor(table);
 
-        // temporary until we have asset manager in
-        Skin skin = new Skin(Gdx.files.internal("skin/craftacular-ui.json"));
+        skin = parent.assetManager.manager.get("skin/craftacular-ui.json");
 
         //create buttons
         TextButton newGame = new TextButton("New Dungeon", skin);
         TextButton chooseHero = new TextButton("Choose Hero", skin);
         TextButton exit = new TextButton("Exit", skin);
 
+        newGame.getLabel().setFontScale(1.5f, 1.5f);
+        chooseHero.getLabel().setFontScale(1.5f, 1.5f);
+        exit.getLabel().setFontScale(1.5f, 1.5f);
+
         //add buttons to table
-        table.add(newGame).fillX().uniformX();
+        table.add(newGame).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
         table.row().pad(10, 0, 10, 0);
-        table.add(chooseHero).fillX().uniformX();
-        table.row().pad(10, 0, 10, 0);
-        table.add(exit).fillX().uniformX();
+        table.add(chooseHero).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
+        table.row().pad(0, 0, 10, 0);
+        table.add(exit).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
 
         // create button listeners
         exit.addListener(new ChangeListener() {
@@ -80,7 +91,7 @@ public class MenuScreen implements Screen{
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // tell our stage to do actions and draw itself
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.act();
         stage.draw();
     }
 

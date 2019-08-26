@@ -12,14 +12,22 @@ public class Dungeon extends com.badlogic.gdx.Game {
     private ChooseHeroScreen chooseHeroScreen;
     private MainScreen mainScreen;
 
+    public GameAssetManager assetManager;
+
     public final static int MENU = 0;
     public final static int CHOOSE_HERO = 1;
     public final static int APPLICATION = 2;
 
     public void create () {
+        assetManager = new GameAssetManager();
+
+        assetManager.queueAddImages();
+        assetManager.queueAddSkin();
+
+        assetManager.manager.finishLoading();
+
         loadingScreen = new LoadingScreen(this);
         setScreen(loadingScreen);
-
     }
 
     public void changeScreen(int screen){

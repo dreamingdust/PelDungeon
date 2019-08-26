@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
+import com.ema.game.components.CombatComponent;
 import com.ema.game.components.EnemyComponent;
 import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.MapObjectComponent;
@@ -22,6 +23,7 @@ import com.ema.game.components.PlayerComponent;
 import com.ema.game.components.TextureComponent;
 import com.ema.game.components.TransformComponent;
 import com.ema.game.components.TypeComponent;
+import com.ema.game.systems.CombatSystem;
 
 public class MapBodyBuilder implements Disposable {
 
@@ -67,14 +69,14 @@ public class MapBodyBuilder implements Disposable {
 //                    BodyDef.BodyType.StaticBody, world,4, true));
 //        }
 
-        Array<RectangleMapObject> doors = map.getLayers().get(MAP_DOOR).getObjects().getByType(RectangleMapObject.class);
-        for (RectangleMapObject rObject : new Array.ArrayIterator<RectangleMapObject>(doors)) {
-            Rectangle rectangle = rObject.getRectangle();
-            mapDoors.add(bodyFactory.makeBoxPolyBody(
-                    new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
-                    new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), // size
-                    BodyDef.BodyType.StaticBody, world,4, false));
-        }
+//        Array<RectangleMapObject> doors = map.getLayers().get(MAP_DOOR).getObjects().getByType(RectangleMapObject.class);
+//        for (RectangleMapObject rObject : new Array.ArrayIterator<RectangleMapObject>(doors)) {
+//            Rectangle rectangle = rObject.getRectangle();
+//            mapDoors.add(bodyFactory.makeBoxPolyBody(
+//                    new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
+//                    new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), // size
+//                    BodyDef.BodyType.StaticBody, world,4, false));
+//        }
 
     }
 
@@ -87,6 +89,7 @@ public class MapBodyBuilder implements Disposable {
         TypeComponent type = engine.createComponent(TypeComponent.class);
         MovementComponent movement = engine.createComponent(MovementComponent.class);
         CollisionComponent collision = engine.createComponent(CollisionComponent.class);
+        CombatComponent combat = engine.createComponent(CombatComponent.class);
 
         final Rectangle rectangle = map.getLayers().get(MAP_PLAYER).getObjects().getByType(RectangleMapObject.class).get(0).getRectangle();
 
@@ -107,6 +110,7 @@ public class MapBodyBuilder implements Disposable {
         entity.add(type);
         entity.add(movement);
         entity.add(collision);
+        entity.add(combat);
 
         engine.addEntity(entity);
         return entity;
@@ -127,6 +131,7 @@ public class MapBodyBuilder implements Disposable {
             TypeComponent type = engine.createComponent(TypeComponent.class);
             MovementComponent movement = engine.createComponent(MovementComponent.class);
             CollisionComponent collision = engine.createComponent(CollisionComponent.class);
+            CombatComponent combat = engine.createComponent(CombatComponent.class);
 
             body.body = bodyFactory.makeBoxPolyBody(
                     new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
@@ -145,6 +150,7 @@ public class MapBodyBuilder implements Disposable {
             entity.add(type);
             entity.add(movement);
             entity.add(collision);
+            entity.add(combat);
 
             enemyEntities.add(entity);
             engine.addEntity(entity);

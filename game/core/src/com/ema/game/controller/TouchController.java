@@ -14,9 +14,18 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.ema.game.ComponentMapperWrapper;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
+import com.ema.game.components.CombatComponent;
+import com.ema.game.components.EnemyComponent;
 import com.ema.game.components.MapObjectComponent;
+import com.ema.game.components.MovementComponent;
+import com.ema.game.components.PlayerComponent;
+import com.ema.game.systems.CombatSystem;
+import com.ema.game.systems.MovementSystem;
 
 public class TouchController extends ApplicationAdapter implements InputProcessor {
     private static final int DIRECTION_LEFT = 1;
@@ -33,25 +42,31 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
     private PooledEngine engine;
     private Entity player;
     private ImmutableArray<Entity> mapTiles;
-    private ExtendViewport viewport;
-    private ShapeRenderer shapes;
+    private FitViewport viewport;
 
+    private ComponentMapper<PlayerComponent> playerMapper;
     private ComponentMapper<BodyComponent> bodyMapper;
     private ComponentMapper<CollisionComponent> collisionMapper;
 
+    private ComponentMapperWrapper components;
+
+    ImmutableArray<Entity> enemies;
+
     private boolean canMove;
 
-    public TouchController(OrthographicCamera camera, Entity player, PooledEngine engine /*, Array<Body> mapTiles*/) {
+    public TouchController(OrthographicCamera camera, Entity player, PooledEngine engine) {
         mousePos = new Vector2(0, 0);
         this.camera = camera;
         this.engine = engine;
         this.player = player;
         mapTiles = engine.getEntitiesFor(Family.all(MapObjectComponent.class).get());
+        playerMapper = ComponentMapper.getFor(PlayerComponent.class);
         bodyMapper = ComponentMapper.getFor(BodyComponent.class);
         collisionMapper = ComponentMapper.getFor(CollisionComponent.class);
+        components = ComponentMapperWrapper.getInstance();
+        enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
         canMove = true;
         direction = DIRECTION_NONE;
-
     }
 
     Vector3 tp = new Vector3();
@@ -60,46 +75,74 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         return false;
     }
 
+    boolean touchedEnemy = false;
     @Override public boolean touchDown (int screenX, int screenY, int pointer, int button) {
         if (button != Input.Buttons.LEFT || pointer > 0) return false;
         dragging = true;
+        touchedEnemy = false;
 
-        if (    screenX >= Gdx.graphics.getWidth()/3 &&
-                screenX <= Gdx.graphics.getWidth() - Gdx.graphics.getWidth()/3 &&
-                screenY <= Gdx.graphics.getHeight()/3) {
+        for (Entity enemy : enemies) {
+//            tp = camera.unproject(new Vector3(screenX, screenY, 0));
+            tp.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(tp);
 
-            direction = DIRECTION_UP;
-            if (collisionMapper.get(player).collision_up) {
-                direction = DIRECTION_NONE;
+            components.enemyMapper.get(enemy).hitLast = false;
+
+            System.out.println(tp.x + " - " + tp.y);
+            System.out.println(bodyMapper.get(enemy).body.getPosition());
+            System.out.println("...........");
+
+            if (bodyMapper.get(enemy).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
+                System.out.println("Enemy touched");
+
+                touchedEnemy = true;
+                engine.getSystem(CombatSystem.class).updateCombat(player, enemy);
+            }
+
+            if (bodyMapper.get(player).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
+                System.out.println("Player touched");
             }
         }
-        else if(screenX >= Gdx.graphics.getWidth()/3 &&
-                screenX <= Gdx.graphics.getWidth() - Gdx.graphics.getWidth()/3 &&
-                screenY >= Gdx.graphics.getHeight() - Gdx.graphics.getHeight()/3) {
 
-            direction = DIRECTION_DOWN;
-            if (collisionMapper.get(player).collision_down) {
-                direction = DIRECTION_NONE;
-            }
-        }
-        else if(screenX >= Gdx.graphics.getWidth() - Gdx.graphics.getWidth()/3 &&
-                screenY >= Gdx.graphics.getHeight()/4 &&
-                screenY <= Gdx.graphics.getHeight() - Gdx.graphics.getHeight()/4 ) {
+        if (!touchedEnemy) {
+            if (screenX >= Gdx.graphics.getWidth() / 3 &&
+                    screenX <= Gdx.graphics.getWidth() - Gdx.graphics.getWidth() / 3 &&
+                    screenY <= Gdx.graphics.getHeight() / 3) {
 
-            direction = DIRECTION_RIGHT;
-            if (collisionMapper.get(player).collision_right) {
-                direction = DIRECTION_NONE;
-            }
-        }
-        else if(screenX <= Gdx.graphics.getWidth()/3 &&
-                screenY >= Gdx.graphics.getHeight()/4 &&
-                screenY <= Gdx.graphics.getHeight() - Gdx.graphics.getHeight()/4 ) {
+                direction = DIRECTION_UP;
+                if (collisionMapper.get(player).collision_up) {
+                    direction = DIRECTION_NONE;
+                }
+            } else if (screenX >= Gdx.graphics.getWidth() / 3 &&
+                    screenX <= Gdx.graphics.getWidth() - Gdx.graphics.getWidth() / 3 &&
+                    screenY >= Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 3) {
 
-            direction = DIRECTION_LEFT;
-            if (collisionMapper.get(player).collision_left) {
-                direction = DIRECTION_NONE;
+                direction = DIRECTION_DOWN;
+                if (collisionMapper.get(player).collision_down) {
+                    direction = DIRECTION_NONE;
+                }
+            } else if (screenX >= Gdx.graphics.getWidth() - Gdx.graphics.getWidth() / 3 &&
+                    screenY >= Gdx.graphics.getHeight() / 4 &&
+                    screenY <= Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 4) {
+
+                direction = DIRECTION_RIGHT;
+                if (collisionMapper.get(player).collision_right) {
+                    direction = DIRECTION_NONE;
+                }
+            } else if (screenX <= Gdx.graphics.getWidth() / 3 &&
+                    screenY >= Gdx.graphics.getHeight() / 4 &&
+                    screenY <= Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 4) {
+
+                direction = DIRECTION_LEFT;
+                if (collisionMapper.get(player).collision_left) {
+                    direction = DIRECTION_NONE;
+                }
             }
+
+            engine.getSystem(MovementSystem.class).updateMovement(player);
         }
+
+
         return true;
     }
 
@@ -128,7 +171,6 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
 
     @Override public void dispose () {
         // disposable stuff must be disposed
-        shapes.dispose();
     }
 
     @Override public boolean keyDown (int keycode) {
@@ -149,10 +191,6 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         System.out.println(amount);
 
         return true;
-    }
-
-    public void updateMapTiles() {
-        mapTiles = engine.getEntitiesFor(Family.all(MapObjectComponent.class).get());
     }
 
     public int getMovementDirection() {

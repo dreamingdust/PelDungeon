@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.ema.game.ComponentMapperWrapper;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.EnemyComponent;
@@ -32,6 +33,8 @@ public class MovementSystem extends IteratingSystem {
     private ComponentMapper<BodyComponent> bodyMapper;
     private ComponentMapper<CollisionComponent> collisionMapper;
 
+    private ComponentMapperWrapper components;
+
     private int direction;
 
     public MovementSystem(TouchController controller, PooledEngine engine) {
@@ -42,6 +45,7 @@ public class MovementSystem extends IteratingSystem {
         bodyMapper = ComponentMapper.getFor(BodyComponent.class);
         collisionMapper = ComponentMapper.getFor(CollisionComponent.class);
         enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
+        components = ComponentMapperWrapper.getInstance();
 
         rand = new Random(System.currentTimeMillis());
         direction = DIRECTION_NONE;
@@ -50,6 +54,9 @@ public class MovementSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
 
+    }
+
+    public void updateMovement(Entity entity) {
         direction = controller.getMovementDirection();
 
         if (direction != DIRECTION_NONE) {
@@ -64,7 +71,9 @@ public class MovementSystem extends IteratingSystem {
             }
             controller.setMovementDirection(DIRECTION_NONE);
             moveTaken = true;
-            engine.getSystem(CollisionSystem.class).updateCollision();
+            engine.getSystem(CollisionSystem.class).updateObjectCollision();
+            engine.getSystem(CollisionSystem.class).updateEntityCollision();
+            engine.getSystem(CollisionSystem.class).updateGlobalCollision();
         } else {
             moveTaken = false;
         }
@@ -94,15 +103,26 @@ public class MovementSystem extends IteratingSystem {
                 }
 
                 if (enemy_direction == DIRECTION_LEFT && !collisionMapper.get(enemy).collision_left) {
+                    System.out.println("Moved left " + collisionMapper.get(enemy).collision_left);
+
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x - 0.32f, bodyMapper.get(enemy).body.getPosition().y, 0);
                 } else if (enemy_direction == DIRECTION_RIGHT && !collisionMapper.get(enemy).collision_right) {
+                    System.out.println("Moved right " + collisionMapper.get(enemy).collision_right);
+
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x + 0.32f, bodyMapper.get(enemy).body.getPosition().y, 0);
                 } else if (enemy_direction == DIRECTION_DOWN && !collisionMapper.get(enemy).collision_down) {
+                    System.out.println("Moved down " + collisionMapper.get(enemy).collision_down);
+
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x, bodyMapper.get(enemy).body.getPosition().y - 0.32f, 0);
                 } else if (enemy_direction == DIRECTION_UP && !collisionMapper.get(enemy).collision_up) {
+                    System.out.println("Moved up " + collisionMapper.get(enemy).collision_up);
+
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x, bodyMapper.get(enemy).body.getPosition().y + 0.32f, 0);
                 }
+
             }
+            engine.getSystem(CollisionSystem.class).updateEntityCollision();
+            engine.getSystem(CollisionSystem.class).updateGlobalCollision();
         }
     }
 }
