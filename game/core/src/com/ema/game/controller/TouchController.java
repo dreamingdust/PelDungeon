@@ -88,10 +88,6 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
 
             components.enemyMapper.get(enemy).hitLast = false;
 
-            System.out.println(tp.x + " - " + tp.y);
-            System.out.println(bodyMapper.get(enemy).body.getPosition());
-            System.out.println("...........");
-
             if (bodyMapper.get(enemy).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
                 System.out.println("Enemy touched");
 
@@ -188,7 +184,6 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
     @Override public boolean scrolled (int amount) {
 
         camera.zoom += .1f;
-        System.out.println(amount);
 
         return true;
     }

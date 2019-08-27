@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -18,9 +20,13 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -54,6 +60,8 @@ public class MainScreen implements Screen {
     private final World world;
     private Skin skin;
 
+    private InputProcessor skillsController;
+    private InputMultiplexer inputMultiplexer;
     private PooledEngine engine;
     private Entity playerEntity;
     private Array<Entity> enemyEntities;
@@ -72,6 +80,8 @@ public class MainScreen implements Screen {
     private ImageButton playerImage;
     private ProgressBar enemyHealthBar;
     private ImageButton enemyImage;
+
+    private Table skillSet;
 
     public MainScreen(Dungeon game) {
 
@@ -94,12 +104,18 @@ public class MainScreen implements Screen {
         camera.zoom = 0.4f;
         skin = parent.assetManager.manager.get("skin/craftacular-ui.json");
 
+        inputMultiplexer = new InputMultiplexer();
+
         objectEntities = mapBodyBuilder.createWalls();
         groundEntities = mapBodyBuilder.createGround();
         playerEntity = mapBodyBuilder.createPlayer();
         enemyEntities = mapBodyBuilder.createEnemies();
 
         components = ComponentMapperWrapper.getInstance();
+
+
+
+
 
 
         Random rand = new Random(System.currentTimeMillis());
@@ -111,7 +127,7 @@ public class MainScreen implements Screen {
 
         components.bodyMapper.get(playerEntity).body.setTransform(startTile.getComponent(BodyComponent.class).body.getPosition(), 0);
 
-        components.textureMapper.get(playerEntity).texture = parent.assetManager.manager.get("images/human_m.png", Texture.class);
+        components.textureMapper.get(playerEntity).texture = parent.assetManager.manager.get("images/heroine.png", Texture.class);
 
         int i;
         for (Entity enemy : enemyEntities) {
@@ -120,7 +136,6 @@ public class MainScreen implements Screen {
 //            components.bodyMapper.get(enemy).body.setTransform(components.bodyMapper.get(groundEntities.get(rand.nextInt(groundEntities.size))).body.getPosition(), 0);
             components.bodyMapper.get(enemy).body.setTransform(components.bodyMapper.get(groundEntities.get(i)).body.getPosition(), 0);
             components.textureMapper.get(enemy).texture = parent.assetManager.manager.get("images/grey_rat.png");
-            System.out.println(components.bodyMapper.get(groundEntities.get(i)).body.getPosition());
         }
 
 
@@ -145,7 +160,6 @@ public class MainScreen implements Screen {
 
 //        controller = new TouchController(camera, playerEntity, mapTiles);
         controller = new TouchController(camera, playerEntity, engine);
-        Gdx.input.setInputProcessor(controller);
 
         engine.addSystem(new CollisionSystem(engine));
 
@@ -161,17 +175,17 @@ public class MainScreen implements Screen {
 
 
         playerHealthBar = new ProgressBar(0f, components.playerMapper.get(playerEntity).maxHealth, 0.01f, false, skin);
-        playerHealthBar.setPosition(50f, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.15f);
+        playerHealthBar.setPosition(Gdx.graphics.getHeight()*0.02f, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.15f);
         playerHealthBar.setSize(Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getHeight() * 0.2f);
         playerHealthBar.setColor(Color.RED);
 //        playerHealthBar.getStyle().knobAfter = new TextureRegionDrawable(healthBarTexture);
         stage.addActor(playerHealthBar);
 
-//        playerImage = new ImageButton(new TextureRegionDrawable(new TextureRegion(components.textureMapper.get(playerEntity).texture)));
-//        playerImage.setTouchable(Touchable.disabled);
-//        playerImage.setPosition(2, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.15f);
-//        playerImage.setSize(Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getWidth() * 0.3f);
-//        stage.addActor(playerImage);
+//        PLAYER_IMAGE = new ImageButton(new TextureRegionDrawable(new TextureRegion(components.textureMapper.get(playerEntity).texture)));
+//        PLAYER_IMAGE.setTouchable(Touchable.disabled);
+//        PLAYER_IMAGE.setPosition(2, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.15f);
+//        PLAYER_IMAGE.setSize(Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getWidth() * 0.3f);
+//        stage.addActor(PLAYER_IMAGE);
 
 
         enemyHealthBar = new ProgressBar(0f, components.playerMapper.get(playerEntity).maxHealth, 0.01f, false, skin);
@@ -182,6 +196,39 @@ public class MainScreen implements Screen {
         enemyHealthBar.setDisabled(true);
         stage.addActor(enemyHealthBar);
 
+
+        skillSet = new Table();
+        skillSet.setSize(Gdx.graphics.getHeight()*0.4f, Gdx.graphics.getHeight()*0.1f);
+        skillSet.setPosition(Gdx.graphics.getHeight()*0.02f, Gdx.graphics.getHeight()*0.02f);
+        skillSet.left();
+
+        ImageButton bash = new ImageButton(skin);
+        ImageButton rend = new ImageButton(skin);
+        ImageButton execute = new ImageButton(skin);
+        ImageButton armorUp = new ImageButton(skin);
+
+        bash.addListener(new ClickListener() {
+
+        });
+
+        System.out.println(bash.getStyle().imageChecked);
+
+        ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
+        style.imageChecked = new SpriteDrawable(skin.getSprite("button-hover"));
+        System.out.println(style.imageChecked);
+
+        skillSet.add(bash).size(skillSet.getWidth()/4, skillSet.getHeight());
+        skillSet.add(rend).size(skillSet.getWidth()/4, skillSet.getHeight());
+        skillSet.add(execute).size(skillSet.getWidth()/4, skillSet.getHeight());
+        skillSet.add(armorUp).size(skillSet.getWidth()/4, skillSet.getHeight());
+
+        stage.addActor(skillSet);
+
+
+
+
+
+
         renderFamily = Family.all(TextureComponent.class).get();
 
 
@@ -191,6 +238,9 @@ public class MainScreen implements Screen {
 //        enemyImage.setSize(Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getWidth() * 0.3f);
 //        stage.addActor(enemyImage);
 
+        inputMultiplexer.addProcessor(stage);
+        inputMultiplexer.addProcessor(controller);
+        Gdx.input.setInputProcessor(inputMultiplexer);
 
     }
 

@@ -40,7 +40,6 @@ public class CombatSystem extends IteratingSystem {
         }
 
         components.enemyMapper.get(enemy).hitLast = true;
-        System.out.println(components.playerMapper.get(player).health + " - " + components.enemyMapper.get(enemy).health);
         if (components.enemyMapper.get(enemy).health <= 0) {
 
             world.destroyBody(components.bodyMapper.get(enemy).body);
