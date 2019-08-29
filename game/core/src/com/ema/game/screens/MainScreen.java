@@ -1,5 +1,6 @@
 package com.ema.game.screens;
 
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -12,29 +13,22 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.ema.game.ComponentMapperWrapper;
 import com.ema.game.Dungeon;
-import com.ema.game.GameAssetManager;
 import com.ema.game.MapBodyBuilder;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.EnemyComponent;
@@ -43,7 +37,11 @@ import com.ema.game.controller.TouchController;
 import com.ema.game.systems.CollisionSystem;
 import com.ema.game.systems.CombatSystem;
 import com.ema.game.systems.MovementSystem;
+import com.ema.game.systems.WarriorSystem;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class MainScreen implements Screen {
@@ -60,35 +58,33 @@ public class MainScreen implements Screen {
     private final World world;
     private Skin skin;
 
-    private InputProcessor skillsController;
     private InputMultiplexer inputMultiplexer;
     private PooledEngine engine;
     private Entity playerEntity;
     private Array<Entity> enemyEntities;
     private Array<Entity> objectEntities;
     private Array<Entity> groundEntities;
-    private Array<Body> mapDoors;
     private ComponentMapperWrapper components;
     private Family renderFamily;
+    private Vector3 playerPosition;
 
-    private Texture wallTexture;
-    private Texture groundTexture;
-    private Texture doorTexture;
-
-    private Texture healthBarTexture;
     private ProgressBar playerHealthBar;
-    private ImageButton playerImage;
     private ProgressBar enemyHealthBar;
-    private ImageButton enemyImage;
+    private Label playerHealthBarText;
+    private Label enemyHealthBarText;
+
+    private Label playerDamageTaken;
+    private Label enemyDamageTaken;
 
     private Table skillSet;
+
+    private List<ComponentMapper> classComponents;
+    private int playerClass;
 
     public MainScreen(Dungeon game) {
 
         // TODO: Skills. Select skill -> target enemy. Self-buffs used directly?
         // TODO: Change orientation? What happens? Can it work without any issues? Research needed.
-
-        // TODO: Health bar for the enemy.
 
         parent = game;
         camera = new OrthographicCamera();
@@ -101,26 +97,26 @@ public class MainScreen implements Screen {
         stage = new Stage();
         engine = new PooledEngine();
         mapBodyBuilder = new MapBodyBuilder(world, engine);
-        camera.zoom = 0.4f;
+        camera.zoom = 0.25f;
         skin = parent.assetManager.manager.get("skin/craftacular-ui.json");
+
+        playerClass = 1; // TODO: The 1 should be like changed to dynamically get what player has chosen.
+
 
         inputMultiplexer = new InputMultiplexer();
 
         objectEntities = mapBodyBuilder.createWalls();
         groundEntities = mapBodyBuilder.createGround();
-        playerEntity = mapBodyBuilder.createPlayer();
+        playerEntity = mapBodyBuilder.createPlayer(playerClass);
         enemyEntities = mapBodyBuilder.createEnemies();
+
 
         components = ComponentMapperWrapper.getInstance();
 
 
 
 
-
-
         Random rand = new Random(System.currentTimeMillis());
-
-        mapDoors = mapBodyBuilder.getDoors();
 
 
         Entity startTile = groundEntities.get(rand.nextInt(groundEntities.size));
@@ -149,7 +145,6 @@ public class MainScreen implements Screen {
 
 
 
-        healthBarTexture = parent.assetManager.manager.get("images/health_bar.png");
 
         camera.position.set(components.bodyMapper.get(playerEntity).body.getPosition(), 0);
 
@@ -157,21 +152,17 @@ public class MainScreen implements Screen {
         map = mapBodyBuilder.getMap();
 
 
-
-//        controller = new TouchController(camera, playerEntity, mapTiles);
         controller = new TouchController(camera, playerEntity, engine);
 
         engine.addSystem(new CollisionSystem(engine));
-
         engine.addSystem(new MovementSystem(controller, engine));
         engine.addSystem(new CombatSystem(engine, world));
 
-//
-//        doorTexture = parent.assetManager.manager.get("images/dngn_closed_door.png");
-//        for (Body door : mapDoors) {
-//            door.setUserData(doorTexture);
-//        }
-
+        if (playerClass == 1) {
+            engine.addSystem(new WarriorSystem(engine));
+        } else if (playerClass == 2) {
+//            engine.addSystem(new WarriorSystem(engine));
+        }
 
 
         playerHealthBar = new ProgressBar(0f, components.playerMapper.get(playerEntity).maxHealth, 0.01f, false, skin);
@@ -187,40 +178,56 @@ public class MainScreen implements Screen {
 //        PLAYER_IMAGE.setSize(Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getWidth() * 0.3f);
 //        stage.addActor(PLAYER_IMAGE);
 
+        playerHealthBarText = new Label(String.valueOf(components.playerMapper.get(playerEntity).maxHealth), skin);
+        playerHealthBarText.setSize(playerHealthBar.getWidth()*0.3f, playerHealthBar.getHeight()*0.3f);
+        playerHealthBarText.setPosition(playerHealthBar.getX() + playerHealthBar.getWidth()*0.7f, playerHealthBar.getY() + playerHealthBar.getHeight()*0.35f);
+        stage.addActor(playerHealthBarText);
+
+
+
 
         enemyHealthBar = new ProgressBar(0f, components.playerMapper.get(playerEntity).maxHealth, 0.01f, false, skin);
         enemyHealthBar.setPosition(Gdx.graphics.getWidth() - (Gdx.graphics.getWidth() * 0.35f ), Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() * 0.15f));
         enemyHealthBar.setSize(Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getHeight() * 0.2f);
         enemyHealthBar.setColor(Color.RED);
 //        playerHealthBar.getStyle().knobAfter = new TextureRegionDrawable(healthBarTexture);
-        enemyHealthBar.setDisabled(true);
+        enemyHealthBar.setVisible(false);
         stage.addActor(enemyHealthBar);
 
+        enemyHealthBarText = new Label(String.valueOf(components.enemyMapper.get(enemyEntities.get(0)).maxHealth), skin);
+        enemyHealthBarText.setSize(enemyHealthBar.getWidth()*0.3f, enemyHealthBar.getHeight()*0.3f);
+        enemyHealthBarText.setPosition(enemyHealthBar.getX(), enemyHealthBar.getY() + enemyHealthBar.getHeight()*0.35f);
+        enemyHealthBarText.setVisible(false);
+        stage.addActor(enemyHealthBarText);
 
-        skillSet = new Table();
-        skillSet.setSize(Gdx.graphics.getHeight()*0.4f, Gdx.graphics.getHeight()*0.1f);
-        skillSet.setPosition(Gdx.graphics.getHeight()*0.02f, Gdx.graphics.getHeight()*0.02f);
-        skillSet.left();
 
-        ImageButton bash = new ImageButton(skin);
-        ImageButton rend = new ImageButton(skin);
-        ImageButton execute = new ImageButton(skin);
-        ImageButton armorUp = new ImageButton(skin);
+        playerDamageTaken = new Label("TestTestTest", skin);
+        playerDamageTaken.setPosition(components.bodyMapper.get(playerEntity).body.getPosition().x, components.bodyMapper.get(playerEntity).body.getPosition().y);
+        playerDamageTaken.setColor(1f, 0f, 0f, 1f);
+        playerDamageTaken.addAction(Actions.sequence(Actions.delay(1f), Actions.fadeOut(2f)));
+        stage.addActor(playerDamageTaken);
 
-        bash.addListener(new ClickListener() {
 
-        });
+        HashMap<String, Texture> skillSetTextures = new HashMap<>();
 
-        System.out.println(bash.getStyle().imageChecked);
 
-        ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
-        style.imageChecked = new SpriteDrawable(skin.getSprite("button-hover"));
-        System.out.println(style.imageChecked);
+        if (playerClass == 1) {
 
-        skillSet.add(bash).size(skillSet.getWidth()/4, skillSet.getHeight());
-        skillSet.add(rend).size(skillSet.getWidth()/4, skillSet.getHeight());
-        skillSet.add(execute).size(skillSet.getWidth()/4, skillSet.getHeight());
-        skillSet.add(armorUp).size(skillSet.getWidth()/4, skillSet.getHeight());
+            skillSetTextures.put("BASH", parent.assetManager.manager.get("images/chain_mace_w_backg.png"));
+            skillSetTextures.put("REND", parent.assetManager.manager.get("images/dh_axe_w_backg.png"));
+            skillSetTextures.put("EXECUTE", parent.assetManager.manager.get("images/sh_axe_w_backg.png"));
+            skillSetTextures.put("ARMORUP", parent.assetManager.manager.get("images/shield_w_backg.png"));
+
+            skillSetTextures.put("BASH_BG", parent.assetManager.manager.get("images/chain_mace_backg.png"));
+            skillSetTextures.put("REND_BG", parent.assetManager.manager.get("images/dh_axe_backg.png"));
+            skillSetTextures.put("EXECUTE_BG", parent.assetManager.manager.get("images/sh_axe_backg.png"));
+            skillSetTextures.put("ARMORUP_BG", parent.assetManager.manager.get("images/shield_backg.png"));
+
+            skillSet = engine.getSystem(WarriorSystem.class).updateUI(skin, skillSetTextures);
+        } else if (playerClass == 2) {
+        }
+
+
 
         stage.addActor(skillSet);
 
@@ -234,7 +241,7 @@ public class MainScreen implements Screen {
 
 //        enemyImage = new ImageButton(new TextureRegionDrawable(new TextureRegion(components.textureMapper.get(enemyEntities.get(0)).texture)));
 //        enemyImage.setTouchable(Touchable.disabled);
-//        enemyImage.setPosition(Gdx.graphics.getWidth() - (Gdx.graphics.getWidth() * 0.40f), Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() * 0.15f));
+//        enemyImage.setPosition(Gdx.graphics.getWidth() - (Gdx.graphics.getWidth() * 0.40f), Gdx.graphics.getHe4ight() - (Gdx.graphics.getHeight() * 0.15f));
 //        enemyImage.setSize(Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getWidth() * 0.3f);
 //        stage.addActor(enemyImage);
 
@@ -266,30 +273,41 @@ public class MainScreen implements Screen {
 
 
         batch.end();
+//
+        playerHealthBar.setRange(0f, components.playerMapper.get(playerEntity).maxHealth);
+        playerHealthBar.setValue(components.playerMapper.get(playerEntity).health);
+        playerHealthBarText.setText(components.playerMapper.get(playerEntity).health + "/" + components.playerMapper.get(playerEntity).maxHealth);
 
-         playerHealthBar.setRange(0f, components.playerMapper.get(playerEntity).maxHealth);
-         playerHealthBar.setValue(components.playerMapper.get(playerEntity).health);
 
-         for (Entity enemy : engine.getEntitiesFor(Family.all(EnemyComponent.class).get())) {
-             if (components.enemyMapper.get(enemy).hitLast) {
-                 enemyHealthBar.setDisabled(false);
-                 enemyHealthBar.setRange(0f, components.enemyMapper.get(enemy).maxHealth);
-                 enemyHealthBar.setValue(components.enemyMapper.get(enemy).health);
-             }
-         }
+        for (Entity enemy : engine.getEntitiesFor(Family.all(EnemyComponent.class).get())) {
+            if (components.enemyMapper.get(enemy).hitLast) {
+                enemyHealthBar.setVisible(true);
+                enemyHealthBarText.setVisible(true);
+                enemyHealthBar.setRange(0f, components.enemyMapper.get(enemy).maxHealth);
+                enemyHealthBar.setValue(components.enemyMapper.get(enemy).health);
+                enemyHealthBarText.setText(components.enemyMapper.get(enemy).health + "/" + components.enemyMapper.get(enemy).maxHealth);
+                break;
+            } else {
+                enemyHealthBar.setVisible(false);
+                enemyHealthBarText.setVisible(false);
+            }
+        }
+
+        playerPosition = camera.project(new Vector3(components.bodyMapper.get(playerEntity).body.getPosition(), 0));
+        playerDamageTaken.setPosition(playerPosition.x, playerPosition.y);
 
         stage.act();
         stage.draw();
 
         camera = controller.getCamera();
 
-//        camera.position.set(player.getPosition(), 0);
         camera.position.set(playerEntity.getComponent(BodyComponent.class).body.getPosition(), 0);
 
         camera.update();
 
         world.step(delta, 6, 2);
         batch.setProjectionMatrix(camera.combined);
+
 
 //        box2DDebugRenderer.render(world, camera.combined);
     }

@@ -6,6 +6,7 @@ import com.ema.game.screens.MainScreen;
 import com.ema.game.screens.MenuScreen;
 
 public class Dungeon extends com.badlogic.gdx.Game {
+    public enum GameScreen {MENU, CHOOSE_HERO, APPLICATION}
 
     private LoadingScreen loadingScreen;
     private MenuScreen menuScreen;
@@ -13,11 +14,6 @@ public class Dungeon extends com.badlogic.gdx.Game {
     private MainScreen mainScreen;
 
     public GameAssetManager assetManager;
-
-    public final static int MENU = 0;
-    public final static int CHOOSE_HERO = 1;
-    public final static int APPLICATION = 2;
-
     public void create () {
         assetManager = new GameAssetManager();
 
@@ -30,7 +26,7 @@ public class Dungeon extends com.badlogic.gdx.Game {
         setScreen(loadingScreen);
     }
 
-    public void changeScreen(int screen){
+    public void changeScreen(GameScreen screen){
         switch(screen){
             case MENU:
                 if(menuScreen == null) menuScreen = new MenuScreen(this);

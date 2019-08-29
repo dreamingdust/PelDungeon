@@ -10,22 +10,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.ema.game.ComponentMapperWrapper;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
-import com.ema.game.components.CombatComponent;
 import com.ema.game.components.EnemyComponent;
 import com.ema.game.components.MapObjectComponent;
-import com.ema.game.components.MovementComponent;
 import com.ema.game.components.PlayerComponent;
 import com.ema.game.systems.CombatSystem;
 import com.ema.game.systems.MovementSystem;
+import com.ema.game.systems.WarriorSystem;
 
 public class TouchController extends ApplicationAdapter implements InputProcessor {
     private static final int DIRECTION_LEFT = 1;
@@ -71,12 +67,14 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
 
     Vector3 tp = new Vector3();
     boolean dragging;
-    @Override public boolean mouseMoved (int screenX, int screenY) {
+    @Override
+    public boolean mouseMoved (int screenX, int screenY) {
         return false;
     }
 
     boolean touchedEnemy = false;
-    @Override public boolean touchDown (int screenX, int screenY, int pointer, int button) {
+    @Override
+    public boolean touchDown (int screenX, int screenY, int pointer, int button) {
         if (button != Input.Buttons.LEFT || pointer > 0) return false;
         dragging = true;
         touchedEnemy = false;
@@ -92,7 +90,13 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
                 System.out.println("Enemy touched");
 
                 touchedEnemy = true;
-                engine.getSystem(CombatSystem.class).updateCombat(player, enemy);
+                if (components.playerMapper.get(player).spellInQueue) {
+                    if (components.warriorMapper.has(player)) {
+                        engine.getSystem(WarriorSystem.class).spellCombat(player, enemy);
+                    }
+                } else {
+                    engine.getSystem(CombatSystem.class).updateMeleeCombat(player, enemy);
+                }
             }
 
             if (bodyMapper.get(player).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
@@ -142,7 +146,8 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         return true;
     }
 
-    @Override public boolean touchDragged (int screenX, int screenY, int pointer) {
+    @Override
+    public boolean touchDragged (int screenX, int screenY, int pointer) {
         if (!dragging) return false;
         //camera.unproject(tp.set(screenX, screenY, 0));
 //        float x = Gdx.input.getDeltaX();
@@ -152,7 +157,8 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         return true;
     }
 
-    @Override public boolean touchUp (int screenX, int screenY, int pointer, int button) {
+    @Override
+    public boolean touchUp (int screenX, int screenY, int pointer, int button) {
         if (button != Input.Buttons.LEFT || pointer > 0) return false;
         camera.unproject(tp.set(screenX, screenY, 0));
         dragging = false;
@@ -160,28 +166,34 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         return true;
     }
 
-    @Override public void resize (int width, int height) {
+    @Override
+    public void resize (int width, int height) {
         // viewport must be updated for it to work properly
         viewport.update(width, height, true);
     }
 
-    @Override public void dispose () {
+    @Override
+    public void dispose () {
         // disposable stuff must be disposed
     }
 
-    @Override public boolean keyDown (int keycode) {
+    @Override
+    public boolean keyDown (int keycode) {
         return false;
     }
 
-    @Override public boolean keyUp (int keycode) {
+    @Override
+    public boolean keyUp (int keycode) {
         return false;
     }
 
-    @Override public boolean keyTyped (char character) {
+    @Override
+    public boolean keyTyped (char character) {
         return false;
     }
 
-    @Override public boolean scrolled (int amount) {
+    @Override
+    public boolean scrolled (int amount) {
 
         camera.zoom += .1f;
 

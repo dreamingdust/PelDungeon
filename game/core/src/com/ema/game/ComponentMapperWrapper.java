@@ -9,9 +9,11 @@ import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.MapObjectComponent;
 import com.ema.game.components.MovementComponent;
 import com.ema.game.components.PlayerComponent;
+import com.ema.game.components.RogueComponent;
 import com.ema.game.components.TextureComponent;
 import com.ema.game.components.TransformComponent;
 import com.ema.game.components.TypeComponent;
+import com.ema.game.components.WarriorComponent;
 
 public class ComponentMapperWrapper {
     private static ComponentMapperWrapper components;
@@ -27,6 +29,8 @@ public class ComponentMapperWrapper {
     public ComponentMapper<TextureComponent> textureMapper;
     public ComponentMapper<TransformComponent> transformMapper;
     public ComponentMapper<TypeComponent> typeMapper;
+    public ComponentMapper<WarriorComponent> warriorMapper;
+    public ComponentMapper<RogueComponent> rogueMapper;
 
 
     private ComponentMapperWrapper() {
@@ -41,6 +45,8 @@ public class ComponentMapperWrapper {
         textureMapper = ComponentMapper.getFor(TextureComponent.class);
         transformMapper = ComponentMapper.getFor(TransformComponent.class);
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
+        warriorMapper = ComponentMapper.getFor(WarriorComponent.class);
+        rogueMapper = ComponentMapper.getFor(RogueComponent.class);
     }
 
     public static ComponentMapperWrapper getInstance() {

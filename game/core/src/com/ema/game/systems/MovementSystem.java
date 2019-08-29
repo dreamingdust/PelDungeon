@@ -103,19 +103,15 @@ public class MovementSystem extends IteratingSystem {
                 }
 
                 if (enemy_direction == DIRECTION_LEFT && !collisionMapper.get(enemy).collision_left) {
-                    System.out.println("Moved left " + collisionMapper.get(enemy).collision_left);
 
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x - 0.32f, bodyMapper.get(enemy).body.getPosition().y, 0);
                 } else if (enemy_direction == DIRECTION_RIGHT && !collisionMapper.get(enemy).collision_right) {
-                    System.out.println("Moved right " + collisionMapper.get(enemy).collision_right);
 
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x + 0.32f, bodyMapper.get(enemy).body.getPosition().y, 0);
                 } else if (enemy_direction == DIRECTION_DOWN && !collisionMapper.get(enemy).collision_down) {
-                    System.out.println("Moved down " + collisionMapper.get(enemy).collision_down);
 
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x, bodyMapper.get(enemy).body.getPosition().y - 0.32f, 0);
                 } else if (enemy_direction == DIRECTION_UP && !collisionMapper.get(enemy).collision_up) {
-                    System.out.println("Moved up " + collisionMapper.get(enemy).collision_up);
 
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x, bodyMapper.get(enemy).body.getPosition().y + 0.32f, 0);
                 }

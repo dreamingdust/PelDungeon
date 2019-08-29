@@ -3,6 +3,8 @@ package com.ema.game.screens;
 import com.badlogic.gdx.Screen;
 import com.ema.game.Dungeon;
 
+import static com.ema.game.Dungeon.GameScreen.MENU;
+
 public class LoadingScreen implements Screen {
 
     private Dungeon parent;
@@ -18,7 +20,7 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        parent.changeScreen(Dungeon.MENU);
+        parent.changeScreen(MENU);
     }
 
     @Override

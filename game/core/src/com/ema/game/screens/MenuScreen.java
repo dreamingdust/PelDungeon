@@ -2,7 +2,6 @@ package com.ema.game.screens;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.ema.game.Dungeon;
 
@@ -16,6 +15,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
+import static com.ema.game.Dungeon.GameScreen.APPLICATION;
+import static com.ema.game.Dungeon.GameScreen.CHOOSE_HERO;
 
 public class MenuScreen implements Screen{
 
@@ -71,14 +73,14 @@ public class MenuScreen implements Screen{
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                parent.changeScreen(Dungeon.APPLICATION);
+                parent.changeScreen(APPLICATION);
             }
         });
 
         chooseHero.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                parent.changeScreen(Dungeon.CHOOSE_HERO);
+                parent.changeScreen(CHOOSE_HERO);
             }
         });
 

@@ -20,10 +20,11 @@ import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.MapObjectComponent;
 import com.ema.game.components.MovementComponent;
 import com.ema.game.components.PlayerComponent;
+import com.ema.game.components.RogueComponent;
 import com.ema.game.components.TextureComponent;
 import com.ema.game.components.TransformComponent;
 import com.ema.game.components.TypeComponent;
-import com.ema.game.systems.CombatSystem;
+import com.ema.game.components.WarriorComponent;
 
 public class MapBodyBuilder implements Disposable {
 
@@ -51,36 +52,9 @@ public class MapBodyBuilder implements Disposable {
         mapGround = new Array<>();
         mapDoors = new Array<>();
 
-//        Array<RectangleMapObject> walls = map.getLayers().get(MAP_WALL).getObjects().getByType(RectangleMapObject.class);
-//        for (RectangleMapObject rObject : new Array.ArrayIterator<RectangleMapObject>(walls)) {
-//            Rectangle rectangle = rObject.getRectangle();
-//            mapTiles.add(bodyFactory.makeBoxPolyBody(
-//                    new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
-//                    new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), // size
-//                    BodyDef.BodyType.StaticBody, world,4, false));
-//        }
-
-//        Array<RectangleMapObject> ground = map.getLayers().get(MAP_GROUND).getObjects().getByType(RectangleMapObject.class);
-//        for (RectangleMapObject rObject : new Array.ArrayIterator<RectangleMapObject>(ground)) {
-//            Rectangle rectangle = rObject.getRectangle();
-//            mapGround.add(bodyFactory.makeBoxPolyBody(
-//                    new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
-//                    new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), // size
-//                    BodyDef.BodyType.StaticBody, world,4, true));
-//        }
-
-//        Array<RectangleMapObject> doors = map.getLayers().get(MAP_DOOR).getObjects().getByType(RectangleMapObject.class);
-//        for (RectangleMapObject rObject : new Array.ArrayIterator<RectangleMapObject>(doors)) {
-//            Rectangle rectangle = rObject.getRectangle();
-//            mapDoors.add(bodyFactory.makeBoxPolyBody(
-//                    new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
-//                    new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), // size
-//                    BodyDef.BodyType.StaticBody, world,4, false));
-//        }
-
     }
 
-    public Entity createPlayer() {
+    public Entity createPlayer(int playerClass) {
         Entity entity = engine.createEntity();
         BodyComponent body = engine.createComponent(BodyComponent.class);
         TransformComponent position = engine.createComponent(TransformComponent.class);
@@ -90,6 +64,20 @@ public class MapBodyBuilder implements Disposable {
         MovementComponent movement = engine.createComponent(MovementComponent.class);
         CollisionComponent collision = engine.createComponent(CollisionComponent.class);
         CombatComponent combat = engine.createComponent(CombatComponent.class);
+
+        player.playerClass = playerClass;
+        if (playerClass == 1) {
+            WarriorComponent warrior = engine.createComponent(WarriorComponent.class);
+
+            warrior.bashValue = 5 + (int)Math.floor(player.strength*0.5f);
+            warrior.rendValue = 2 + (int)Math.floor(player.strength*0.2f);
+            warrior.executeValue = 7 + (int)Math.floor(player.strength*0.4f);
+            warrior.armorUpValue = 1 + (int)Math.floor(player.strength*0.1f);
+
+            entity.add(warrior);
+        } else if (playerClass == 2) {
+            RogueComponent rogue = engine.createComponent(RogueComponent.class);
+        }
 
         final Rectangle rectangle = map.getLayers().get(MAP_PLAYER).getObjects().getByType(RectangleMapObject.class).get(0).getRectangle();
 
