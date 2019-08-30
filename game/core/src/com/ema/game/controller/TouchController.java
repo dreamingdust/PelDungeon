@@ -19,8 +19,11 @@ import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.EnemyComponent;
 import com.ema.game.components.MapObjectComponent;
 import com.ema.game.components.PlayerComponent;
+import com.ema.game.components.RogueComponent;
+import com.ema.game.components.WarriorComponent;
 import com.ema.game.systems.CombatSystem;
 import com.ema.game.systems.MovementSystem;
+import com.ema.game.systems.RogueSystem;
 import com.ema.game.systems.WarriorSystem;
 
 public class TouchController extends ApplicationAdapter implements InputProcessor {
@@ -40,15 +43,16 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
     private ImmutableArray<Entity> mapTiles;
     private FitViewport viewport;
 
-    private ComponentMapper<PlayerComponent> playerMapper;
-    private ComponentMapper<BodyComponent> bodyMapper;
-    private ComponentMapper<CollisionComponent> collisionMapper;
-
     private ComponentMapperWrapper components;
+    private WarriorComponent warrior;
+    private RogueComponent rogue;
 
     ImmutableArray<Entity> enemies;
 
-    private boolean canMove;
+    Vector3 tp = new Vector3();
+    boolean dragging;
+
+    boolean touchedEnemy;
 
     public TouchController(OrthographicCamera camera, Entity player, PooledEngine engine) {
         mousePos = new Vector2(0, 0);
@@ -56,23 +60,36 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         this.engine = engine;
         this.player = player;
         mapTiles = engine.getEntitiesFor(Family.all(MapObjectComponent.class).get());
-        playerMapper = ComponentMapper.getFor(PlayerComponent.class);
-        bodyMapper = ComponentMapper.getFor(BodyComponent.class);
-        collisionMapper = ComponentMapper.getFor(CollisionComponent.class);
+
         components = ComponentMapperWrapper.getInstance();
+        if (components.warriorMapper.has(player)) {
+            warrior = components.warriorMapper.get(player);
+        } else if (components.rogueMapper.has(player)) {
+            rogue = components.rogueMapper.get(player);
+        }
+
         enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
-        canMove = true;
+        touchedEnemy = false;
         direction = DIRECTION_NONE;
     }
 
-    Vector3 tp = new Vector3();
-    boolean dragging;
+    // Although unnecessary for mobile game, the parent class is abstract and they have
+    // to be overridden.
     @Override
-    public boolean mouseMoved (int screenX, int screenY) {
+    public boolean keyDown(int keycode) {
         return false;
     }
 
-    boolean touchedEnemy = false;
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
     @Override
     public boolean touchDown (int screenX, int screenY, int pointer, int button) {
         if (button != Input.Buttons.LEFT || pointer > 0) return false;
@@ -80,27 +97,38 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         touchedEnemy = false;
 
         for (Entity enemy : enemies) {
-//            tp = camera.unproject(new Vector3(screenX, screenY, 0));
             tp.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(tp);
 
             components.enemyMapper.get(enemy).hitLast = false;
 
-            if (bodyMapper.get(enemy).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
+            if (components.bodyMapper.get(enemy).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
                 System.out.println("Enemy touched");
 
                 touchedEnemy = true;
                 if (components.playerMapper.get(player).spellInQueue) {
                     if (components.warriorMapper.has(player)) {
                         engine.getSystem(WarriorSystem.class).spellCombat(player, enemy);
+                    } else if (components.rogueMapper.has(player)) {
+                        engine.getSystem(RogueSystem.class).spellCombat(player, enemy);
                     }
                 } else {
                     engine.getSystem(CombatSystem.class).updateMeleeCombat(player, enemy);
                 }
+                components.playerMapper.get(player).round++;
             }
 
-            if (bodyMapper.get(player).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
-                System.out.println("Player touched");
+            if (components.bodyMapper.get(player).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
+                if (components.playerMapper.get(player).spellInQueue) {
+                    if (components.warriorMapper.has(player) && warrior.spell == warrior.ARMORUP) {
+                        engine.getSystem(WarriorSystem.class).spellCombat(player, enemy);
+                    } else if (components.rogueMapper.has(player) && rogue.spell == rogue.ENVENOM) {
+                        engine.getSystem(RogueSystem.class).spellCombat(player, enemy);
+                    }
+                } else {
+                    engine.getSystem(CombatSystem.class).updateMeleeCombat(player, enemy);
+                }
+                components.playerMapper.get(player).round++;
             }
         }
 
@@ -110,7 +138,7 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
                     screenY <= Gdx.graphics.getHeight() / 3) {
 
                 direction = DIRECTION_UP;
-                if (collisionMapper.get(player).collision_up) {
+                if (components.collisionMapper.get(player).collision_up) {
                     direction = DIRECTION_NONE;
                 }
             } else if (screenX >= Gdx.graphics.getWidth() / 3 &&
@@ -118,7 +146,7 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
                     screenY >= Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 3) {
 
                 direction = DIRECTION_DOWN;
-                if (collisionMapper.get(player).collision_down) {
+                if (components.collisionMapper.get(player).collision_down) {
                     direction = DIRECTION_NONE;
                 }
             } else if (screenX >= Gdx.graphics.getWidth() - Gdx.graphics.getWidth() / 3 &&
@@ -126,7 +154,7 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
                     screenY <= Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 4) {
 
                 direction = DIRECTION_RIGHT;
-                if (collisionMapper.get(player).collision_right) {
+                if (components.collisionMapper.get(player).collision_right) {
                     direction = DIRECTION_NONE;
                 }
             } else if (screenX <= Gdx.graphics.getWidth() / 3 &&
@@ -134,7 +162,7 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
                     screenY <= Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 4) {
 
                 direction = DIRECTION_LEFT;
-                if (collisionMapper.get(player).collision_left) {
+                if (components.collisionMapper.get(player).collision_left) {
                     direction = DIRECTION_NONE;
                 }
             }
@@ -149,12 +177,22 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
     @Override
     public boolean touchDragged (int screenX, int screenY, int pointer) {
         if (!dragging) return false;
-        //camera.unproject(tp.set(screenX, screenY, 0));
-//        float x = Gdx.input.getDeltaX();
-//        float y = Gdx.input.getDeltaY();
-//
-//        camera.translate(-x,y);
+        camera.unproject(tp.set(screenX, screenY, 0));
+        float x = Gdx.input.getDeltaX();
+        float y = Gdx.input.getDeltaY();
+
+        camera.translate(-x,y);
         return true;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        return false;
     }
 
     @Override
@@ -175,29 +213,6 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
     @Override
     public void dispose () {
         // disposable stuff must be disposed
-    }
-
-    @Override
-    public boolean keyDown (int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyUp (int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped (char character) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled (int amount) {
-
-        camera.zoom += .1f;
-
-        return true;
     }
 
     public int getMovementDirection() {

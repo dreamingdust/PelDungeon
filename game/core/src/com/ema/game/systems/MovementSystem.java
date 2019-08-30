@@ -62,8 +62,10 @@ public class MovementSystem extends IteratingSystem {
         if (direction != DIRECTION_NONE) {
             if (direction == DIRECTION_LEFT) {
                 bodyMapper.get(entity).body.setTransform(bodyMapper.get(entity).body.getPosition().x - 0.32f, bodyMapper.get(entity).body.getPosition().y, 0);
+                components.textureMapper.get(entity).flip = true;
             } else if (direction == DIRECTION_RIGHT) {
                 bodyMapper.get(entity).body.setTransform(bodyMapper.get(entity).body.getPosition().x + 0.32f, bodyMapper.get(entity).body.getPosition().y, 0);
+                components.textureMapper.get(entity).flip = false;
             } else if (direction == DIRECTION_DOWN) {
                 bodyMapper.get(entity).body.setTransform(bodyMapper.get(entity).body.getPosition().x, bodyMapper.get(entity).body.getPosition().y - 0.32f, 0);
             } else if (direction == DIRECTION_UP) {
@@ -103,16 +105,16 @@ public class MovementSystem extends IteratingSystem {
                 }
 
                 if (enemy_direction == DIRECTION_LEFT && !collisionMapper.get(enemy).collision_left) {
-
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x - 0.32f, bodyMapper.get(enemy).body.getPosition().y, 0);
+                    components.textureMapper.get(enemy).flip = false;
+
                 } else if (enemy_direction == DIRECTION_RIGHT && !collisionMapper.get(enemy).collision_right) {
-
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x + 0.32f, bodyMapper.get(enemy).body.getPosition().y, 0);
-                } else if (enemy_direction == DIRECTION_DOWN && !collisionMapper.get(enemy).collision_down) {
+                    components.textureMapper.get(enemy).flip = true;
 
+                } else if (enemy_direction == DIRECTION_DOWN && !collisionMapper.get(enemy).collision_down) {
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x, bodyMapper.get(enemy).body.getPosition().y - 0.32f, 0);
                 } else if (enemy_direction == DIRECTION_UP && !collisionMapper.get(enemy).collision_up) {
-
                     bodyMapper.get(enemy).body.setTransform(bodyMapper.get(enemy).body.getPosition().x, bodyMapper.get(enemy).body.getPosition().y + 0.32f, 0);
                 }
 

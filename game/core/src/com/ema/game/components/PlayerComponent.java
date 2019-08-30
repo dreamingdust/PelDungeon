@@ -19,4 +19,13 @@ public class PlayerComponent implements Component {
     public int xpForLevel = 20 * level;
 
     public boolean spellInQueue = false;
+
+    // The player may have only one of each types of spell buffs at a time.
+    public int buffValue = 0;
+    public int armorBuffDuration = 0;
+    public int strengthBuffDuration = 0;
+    public boolean hasArmorBuff = false;
+    public boolean hasStrengthBuff = false;
+
+    public int round = 0;
 }

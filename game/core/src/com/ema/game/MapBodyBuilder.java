@@ -77,6 +77,13 @@ public class MapBodyBuilder implements Disposable {
             entity.add(warrior);
         } else if (playerClass == 2) {
             RogueComponent rogue = engine.createComponent(RogueComponent.class);
+
+            rogue.envenomValue = 2 + (int)Math.floor(player.strength*0.2f);
+            rogue.stabValue = 2 + player.strength + player.level;
+            rogue.doubleStrikeValue = player.strength*2;
+            rogue.vanishValue = 2 + (int)Math.floor(player.strength*0.2f);
+
+            entity.add(rogue);
         }
 
         final Rectangle rectangle = map.getLayers().get(MAP_PLAYER).getObjects().getByType(RectangleMapObject.class).get(0).getRectangle();

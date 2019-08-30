@@ -20,7 +20,7 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        parent.changeScreen(MENU);
+        parent.changeScreen(MENU, 0);
     }
 
     @Override

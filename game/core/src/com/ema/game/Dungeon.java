@@ -26,7 +26,7 @@ public class Dungeon extends com.badlogic.gdx.Game {
         setScreen(loadingScreen);
     }
 
-    public void changeScreen(GameScreen screen){
+    public void changeScreen(GameScreen screen, int playerClass){
         switch(screen){
             case MENU:
                 if(menuScreen == null) menuScreen = new MenuScreen(this);
@@ -40,10 +40,7 @@ public class Dungeon extends com.badlogic.gdx.Game {
                 break;
             case APPLICATION:
                 if(mainScreen == null) {
-                    mainScreen = new MainScreen(this);
-                } else {
-                    // TODO: implement resetWorld function to clear already existing entities and objects
-                    // mainScreen.resetWorld();
+                    mainScreen = new MainScreen(this, playerClass);
                 }
                 this.setScreen(mainScreen);
                 break;

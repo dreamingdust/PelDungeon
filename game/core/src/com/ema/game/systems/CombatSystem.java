@@ -7,7 +7,6 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.physics.box2d.World;
 import com.ema.game.ComponentMapperWrapper;
 import com.ema.game.components.PlayerComponent;
-import com.ema.game.components.WarriorComponent;
 
 public class CombatSystem extends IteratingSystem {
 
@@ -40,10 +39,7 @@ public class CombatSystem extends IteratingSystem {
             // The DoT ignores any armor
             components.enemyMapper.get(enemy).health -= components.enemyMapper.get(enemy).dotValue;
 
-            if ((   components.enemyMapper.get(enemy).strength > components.playerMapper.get(player).armor)
-                    && !components.enemyMapper.get(enemy).isStunned) {
-                components.playerMapper.get(player).health -= (components.enemyMapper.get(enemy).strength - components.playerMapper.get(player).armor);
-            }
+            enemyAttack(player, enemy);
         }
 
         checkEnemy(player, enemy);
@@ -54,6 +50,7 @@ public class CombatSystem extends IteratingSystem {
 
     public void updateSpellCombat(Entity player, Entity enemy, int spellValue, int duration, boolean isDebuff, boolean isStun) {
         if (components.combatMapper.get(player).inCombat && components.combatMapper.get(enemy).inCombat) {
+            System.out.println("Why am I here?");
             if (isDebuff) {
                 components.enemyMapper.get(enemy).hasDebuff = true;
                 components.enemyMapper.get(enemy).dotValue = spellValue;
@@ -70,11 +67,43 @@ public class CombatSystem extends IteratingSystem {
                 components.enemyMapper.get(enemy).stunDuration = duration;
             }
 
+            enemyAttack(player, enemy);
 
         }
 
         checkEnemy(player, enemy);
 
+    }
+
+    private void enemyAttack(Entity player, Entity enemy) {
+        if ((   components.enemyMapper.get(enemy).strength > components.playerMapper.get(player).armor)
+                && !components.enemyMapper.get(enemy).isStunned) {
+            components.playerMapper.get(player).health -= (components.enemyMapper.get(enemy).strength - components.playerMapper.get(player).armor);
+        } else if (components.enemyMapper.get(enemy).isStunned) {
+            components.enemyMapper.get(enemy).stunDuration--;
+            if (components.enemyMapper.get(enemy).stunDuration == 0) {
+                components.enemyMapper.get(enemy).isStunned = false;
+            }
+        }
+
+        if (components.playerMapper.get(player).hasArmorBuff) {
+            components.playerMapper.get(player).armorBuffDuration--;
+            if (components.playerMapper.get(player).armorBuffDuration == 0) {
+                components.playerMapper.get(player).hasArmorBuff = false;
+            }
+        }
+        if (components.playerMapper.get(player).hasStrengthBuff) {
+            components.playerMapper.get(player).strengthBuffDuration--;
+            if (components.playerMapper.get(player).strengthBuffDuration == 0) {
+                components.playerMapper.get(player).hasStrengthBuff = false;
+            }
+        }
+
+        if (components.warriorMapper.has(player)) {
+            engine.getSystem(WarriorSystem.class).decrementCooldowns();
+        } else if (components.rogueMapper.has(player)) {
+            engine.getSystem(RogueSystem.class).decrementCooldowns();
+        }
     }
 
     private void checkEnemy(Entity player, Entity enemy) {
@@ -94,7 +123,7 @@ public class CombatSystem extends IteratingSystem {
             if (components.warriorMapper.has(player)) {
                 engine.getSystem(WarriorSystem.class).updateWarrior();
             } else if (components.rogueMapper.has(player)) {
-
+                engine.getSystem(RogueSystem.class).updateRogue();
             }
         }
     }

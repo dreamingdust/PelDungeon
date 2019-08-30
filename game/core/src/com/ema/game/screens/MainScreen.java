@@ -32,11 +32,13 @@ import com.ema.game.Dungeon;
 import com.ema.game.MapBodyBuilder;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.EnemyComponent;
+import com.ema.game.components.RogueComponent;
 import com.ema.game.components.TextureComponent;
 import com.ema.game.controller.TouchController;
 import com.ema.game.systems.CollisionSystem;
 import com.ema.game.systems.CombatSystem;
 import com.ema.game.systems.MovementSystem;
+import com.ema.game.systems.RogueSystem;
 import com.ema.game.systems.WarriorSystem;
 
 import java.util.ArrayList;
@@ -57,6 +59,7 @@ public class MainScreen implements Screen {
     private final MapBodyBuilder mapBodyBuilder;
     private final World world;
     private Skin skin;
+    private int playerClass;
 
     private InputMultiplexer inputMultiplexer;
     private PooledEngine engine;
@@ -76,15 +79,15 @@ public class MainScreen implements Screen {
     private Label playerDamageTaken;
     private Label enemyDamageTaken;
 
+    private ArrayList<Label> skillCDLabels;
+
     private Table skillSet;
 
-    private List<ComponentMapper> classComponents;
-    private int playerClass;
+    public MainScreen(Dungeon game, int playerClass) {
 
-    public MainScreen(Dungeon game) {
-
-        // TODO: Skills. Select skill -> target enemy. Self-buffs used directly?
         // TODO: Change orientation? What happens? Can it work without any issues? Research needed.
+        // TODO: Spells cooldowns
+        // TODO:
 
         parent = game;
         camera = new OrthographicCamera();
@@ -99,9 +102,9 @@ public class MainScreen implements Screen {
         mapBodyBuilder = new MapBodyBuilder(world, engine);
         camera.zoom = 0.25f;
         skin = parent.assetManager.manager.get("skin/craftacular-ui.json");
+        this.playerClass = playerClass;
 
-        playerClass = 1; // TODO: The 1 should be like changed to dynamically get what player has chosen.
-
+        skillCDLabels = new ArrayList<>();
 
         inputMultiplexer = new InputMultiplexer();
 
@@ -123,14 +126,8 @@ public class MainScreen implements Screen {
 
         components.bodyMapper.get(playerEntity).body.setTransform(startTile.getComponent(BodyComponent.class).body.getPosition(), 0);
 
-        components.textureMapper.get(playerEntity).texture = parent.assetManager.manager.get("images/heroine.png", Texture.class);
-
-        int i;
         for (Entity enemy : enemyEntities) {
-            i = rand.nextInt(groundEntities.size);
-//            components.bodyMapper.get(enemy).body.setTransform(groundEntities.get(rand.nextInt(groundEntities.size)).getComponent(BodyComponent.class).body.getPosition(), 0);
-//            components.bodyMapper.get(enemy).body.setTransform(components.bodyMapper.get(groundEntities.get(rand.nextInt(groundEntities.size))).body.getPosition(), 0);
-            components.bodyMapper.get(enemy).body.setTransform(components.bodyMapper.get(groundEntities.get(i)).body.getPosition(), 0);
+            components.bodyMapper.get(enemy).body.setTransform(components.bodyMapper.get(groundEntities.get(rand.nextInt(groundEntities.size))).body.getPosition(), 0);
             components.textureMapper.get(enemy).texture = parent.assetManager.manager.get("images/grey_rat.png");
         }
 
@@ -157,12 +154,6 @@ public class MainScreen implements Screen {
         engine.addSystem(new CollisionSystem(engine));
         engine.addSystem(new MovementSystem(controller, engine));
         engine.addSystem(new CombatSystem(engine, world));
-
-        if (playerClass == 1) {
-            engine.addSystem(new WarriorSystem(engine));
-        } else if (playerClass == 2) {
-//            engine.addSystem(new WarriorSystem(engine));
-        }
 
 
         playerHealthBar = new ProgressBar(0f, components.playerMapper.get(playerEntity).maxHealth, 0.01f, false, skin);
@@ -211,7 +202,10 @@ public class MainScreen implements Screen {
         HashMap<String, Texture> skillSetTextures = new HashMap<>();
 
 
-        if (playerClass == 1) {
+        if (playerClass == components.playerMapper.get(playerEntity).WARRIOR_CLASS) {
+            engine.addSystem(new WarriorSystem(engine, skin));
+
+            components.textureMapper.get(playerEntity).texture = parent.assetManager.manager.get("images/heroine.png", Texture.class);
 
             skillSetTextures.put("BASH", parent.assetManager.manager.get("images/chain_mace_w_backg.png"));
             skillSetTextures.put("REND", parent.assetManager.manager.get("images/dh_axe_w_backg.png"));
@@ -223,17 +217,35 @@ public class MainScreen implements Screen {
             skillSetTextures.put("EXECUTE_BG", parent.assetManager.manager.get("images/sh_axe_backg.png"));
             skillSetTextures.put("ARMORUP_BG", parent.assetManager.manager.get("images/shield_backg.png"));
 
-            skillSet = engine.getSystem(WarriorSystem.class).updateUI(skin, skillSetTextures);
-        } else if (playerClass == 2) {
+            skillSet = engine.getSystem(WarriorSystem.class).updateUI(skillSetTextures);
+        } else if (playerClass == components.playerMapper.get(playerEntity).ROGUE_CLASS) {
+            engine.addSystem(new RogueSystem(engine, skin));
+
+            components.textureMapper.get(playerEntity).texture = parent.assetManager.manager.get("images/hero.png", Texture.class);
+
+            skillSetTextures.put("ENVENOM", parent.assetManager.manager.get("images/poison_w_backg.png"));
+            skillSetTextures.put("STAB", parent.assetManager.manager.get("images/dagger_w_backg.png"));
+            skillSetTextures.put("DOUBLE_STRIKE", parent.assetManager.manager.get("images/sword_w_backg.png"));
+            skillSetTextures.put("VANISH", parent.assetManager.manager.get("images/shield_w_backg.png"));
+
+            skillSetTextures.put("ENVENOM_BG", parent.assetManager.manager.get("images/poison_backg.png"));
+            skillSetTextures.put("STAB_BG", parent.assetManager.manager.get("images/dagger_backg.png"));
+            skillSetTextures.put("DOUBLE_STRIKE_BG", parent.assetManager.manager.get("images/sword_backg.png"));
+            skillSetTextures.put("VANISH_BG", parent.assetManager.manager.get("images/shield_backg.png"));
+
+            skillSet = engine.getSystem(RogueSystem.class).updateUI(skillSetTextures);
         }
-
-
 
         stage.addActor(skillSet);
 
+        for (int i = 0; i <= 3; i++) {
+            skillCDLabels.add(new Label("", skin));
+            skillCDLabels.get(i).setPosition(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f);
+            skillCDLabels.get(i).setSize(20f, 20f);
+            skillCDLabels.get(i).setFontScale(1.5f, 1.5f);
 
-
-
+            stage.addActor(skillCDLabels.get(i));
+        }
 
 
         renderFamily = Family.all(TextureComponent.class).get();
@@ -241,7 +253,7 @@ public class MainScreen implements Screen {
 
 //        enemyImage = new ImageButton(new TextureRegionDrawable(new TextureRegion(components.textureMapper.get(enemyEntities.get(0)).texture)));
 //        enemyImage.setTouchable(Touchable.disabled);
-//        enemyImage.setPosition(Gdx.graphics.getWidth() - (Gdx.graphics.getWidth() * 0.40f), Gdx.graphics.getHe4ight() - (Gdx.graphics.getHeight() * 0.15f));
+//        enemyImage.setPosition(Gdx.graphics.getWidth() - (Gdx.graphics.getWidth() * 0.40f), Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() * 0.15f));
 //        enemyImage.setSize(Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getWidth() * 0.3f);
 //        stage.addActor(enemyImage);
 
@@ -266,9 +278,10 @@ public class MainScreen implements Screen {
 
 
         for (Entity object : engine.getEntitiesFor(renderFamily)) {
-            batch.draw(components.textureMapper.get(object).texture,
-                    components.bodyMapper.get(object).body.getPosition().x - 0.15f,
-                    components.bodyMapper.get(object).body.getPosition().y - 0.15f, 0.3f, 0.3f);
+            batch.draw( components.textureMapper.get(object).texture,
+                        components.textureMapper.get(object).flip ? components.bodyMapper.get(object).body.getPosition().x + 0.15f : components.bodyMapper.get(object).body.getPosition().x - 0.15f,
+                        components.bodyMapper.get(object).body.getPosition().y - 0.15f,
+                        components.textureMapper.get(object).flip ? - 0.3f : 0.3f, 0.3f);
         }
 
 
@@ -295,6 +308,17 @@ public class MainScreen implements Screen {
 
         playerPosition = camera.project(new Vector3(components.bodyMapper.get(playerEntity).body.getPosition(), 0));
         playerDamageTaken.setPosition(playerPosition.x, playerPosition.y);
+
+        // 1 for Warrior, 2 for Rogue
+        if (playerClass == 1) {
+            for (int i = 0; i <= skillCDLabels.size() - 1; i++) {
+                skillCDLabels.set(i, engine.getSystem(WarriorSystem.class).skillLabel(skillCDLabels.get(i), i));
+            }
+        } else if (playerClass == 2) {
+            for (int i = 0; i <= skillCDLabels.size() - 1; i++) {
+                skillCDLabels.set(i, engine.getSystem(RogueSystem.class).skillLabel(skillCDLabels.get(i), i));
+            }
+        }
 
         stage.act();
         stage.draw();
