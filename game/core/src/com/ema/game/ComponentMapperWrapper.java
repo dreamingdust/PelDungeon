@@ -5,6 +5,7 @@ import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.CombatComponent;
 import com.ema.game.components.EnemyComponent;
+import com.ema.game.components.MapExitComponent;
 import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.MapObjectComponent;
 import com.ema.game.components.MovementComponent;
@@ -31,6 +32,7 @@ public class ComponentMapperWrapper {
     public ComponentMapper<TypeComponent> typeMapper;
     public ComponentMapper<WarriorComponent> warriorMapper;
     public ComponentMapper<RogueComponent> rogueMapper;
+    public ComponentMapper<MapExitComponent> mapExitMapper;
 
 
     private ComponentMapperWrapper() {
@@ -47,6 +49,7 @@ public class ComponentMapperWrapper {
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
         warriorMapper = ComponentMapper.getFor(WarriorComponent.class);
         rogueMapper = ComponentMapper.getFor(RogueComponent.class);
+        mapExitMapper = ComponentMapper.getFor(MapExitComponent.class);
     }
 
     public static ComponentMapperWrapper getInstance() {

@@ -28,4 +28,6 @@ public class PlayerComponent implements Component {
     public boolean hasStrengthBuff = false;
 
     public int round = 0;
+    public boolean nearExit = false;
+    public boolean onExit = false;
 }

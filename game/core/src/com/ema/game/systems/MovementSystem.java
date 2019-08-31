@@ -2,6 +2,7 @@ package com.ema.game.systems;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -10,12 +11,13 @@ import com.ema.game.ComponentMapperWrapper;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.EnemyComponent;
+import com.ema.game.components.MapExitComponent;
 import com.ema.game.components.PlayerComponent;
 import com.ema.game.controller.TouchController;
 
 import java.util.Random;
 
-public class MovementSystem extends IteratingSystem {
+public class MovementSystem extends EntitySystem {
     private static final int DIRECTION_LEFT = 1;
     private static final int DIRECTION_RIGHT = 2;
     private static final int DIRECTION_UP = 3;
@@ -25,6 +27,7 @@ public class MovementSystem extends IteratingSystem {
     TouchController controller;
     PooledEngine engine;
     ImmutableArray<Entity> enemies;
+    ImmutableArray<Entity> exit;
 
     public boolean moveTaken;
     Random rand;
@@ -38,22 +41,17 @@ public class MovementSystem extends IteratingSystem {
     private int direction;
 
     public MovementSystem(TouchController controller, PooledEngine engine) {
-        super(Family.all(PlayerComponent.class).get());
         this.controller = controller;
         this.engine = engine;
 
         bodyMapper = ComponentMapper.getFor(BodyComponent.class);
         collisionMapper = ComponentMapper.getFor(CollisionComponent.class);
         enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
+        exit = engine.getEntitiesFor(Family.all(MapExitComponent.class).get());
         components = ComponentMapperWrapper.getInstance();
 
         rand = new Random(System.currentTimeMillis());
         direction = DIRECTION_NONE;
-    }
-
-    @Override
-    protected void processEntity(Entity entity, float deltaTime) {
-
     }
 
     public void updateMovement(Entity entity) {
@@ -80,6 +78,11 @@ public class MovementSystem extends IteratingSystem {
             moveTaken = false;
         }
 
+        if (components.playerMapper.get(entity).nearExit) {
+            if (bodyMapper.get(exit.get(0)).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition())) {
+                components.playerMapper.get(entity).onExit = true;
+            }
+        }
 
         if (moveTaken) {
             int enemy_direction;

@@ -18,6 +18,7 @@ public class GameAssetManager {
     private final String BACKGROUND_IMAGE = "images/stone_gray2.png";
     private final String HERO_IMAGE = "images/hero.png";
     private final String HEROINE_IMAGE = "images/heroine.png";
+    private final String EXIT_IMAGE = "images/stone_stairs_down.png";
 
     // Skill textures
     private final String DH_AXE_BG_IMAGE = "images/dh_axe_backg.png";
@@ -52,6 +53,7 @@ public class GameAssetManager {
         manager.load(BACKGROUND_IMAGE, Texture.class);
         manager.load(HERO_IMAGE, Texture.class);
         manager.load(HEROINE_IMAGE, Texture.class);
+        manager.load(EXIT_IMAGE, Texture.class);
 
         manager.load(DH_AXE_BG_IMAGE, Texture.class);
         manager.load(DH_AXE_IMAGE, Texture.class);
@@ -67,7 +69,6 @@ public class GameAssetManager {
 
         manager.load(SWORD_BG_IMAGE, Texture.class);
         manager.load(SWORD_IMAGE, Texture.class);
-
 
         manager.load(SHIELD_BG_IMAGE, Texture.class);
         manager.load(SHIELD_IMAGE, Texture.class);

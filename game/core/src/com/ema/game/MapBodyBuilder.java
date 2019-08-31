@@ -16,6 +16,7 @@ import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.CombatComponent;
 import com.ema.game.components.EnemyComponent;
+import com.ema.game.components.MapExitComponent;
 import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.MapObjectComponent;
 import com.ema.game.components.MovementComponent;
@@ -26,6 +27,8 @@ import com.ema.game.components.TransformComponent;
 import com.ema.game.components.TypeComponent;
 import com.ema.game.components.WarriorComponent;
 
+import java.util.Random;
+
 public class MapBodyBuilder implements Disposable {
 
 
@@ -33,25 +36,26 @@ public class MapBodyBuilder implements Disposable {
     private static final String MAP_PLAYER = "player";
     private static final String MAP_ENEMY = "enemies";
     private static final String MAP_GROUND = "ground";
-    private static final String MAP_DOOR = "doors";
+    private static final String MAP_EXIT = "exit";
 
     private World world;
     private TiledMap map;
     private PooledEngine engine;
     private BodyFactory bodyFactory;
-    private Array<Body> mapTiles;
-    private Array<Body> mapGround;
-    private Array<Body> mapDoors;
+
+    Random rand = new Random(System.currentTimeMillis());
 
     public MapBodyBuilder(World world, PooledEngine engine) {
         this.world = world;
         this.engine = engine;
-        map = new TmxMapLoader().load("map/test_map.tmx");
+        String mapName = "map/map" + (rand.nextInt(3)+1) + ".tmx";
+        map = new TmxMapLoader().load(mapName);
         bodyFactory = BodyFactory.getInstance(world);
-        mapTiles = new Array<>();
-        mapGround = new Array<>();
-        mapDoors = new Array<>();
+    }
 
+    public void updateBuilder() {
+        String mapName = "map/map" + (rand.nextInt(3)+1) + ".tmx";
+        map = new TmxMapLoader().load(mapName);
     }
 
     public Entity createPlayer(int playerClass) {
@@ -189,6 +193,8 @@ public class MapBodyBuilder implements Disposable {
             engine.addEntity(entity);
         }
 
+        System.out.println("CREATE WALLS");
+
         return objectEntities;
     }
 
@@ -226,23 +232,45 @@ public class MapBodyBuilder implements Disposable {
             engine.addEntity(entity);
         }
 
+        System.out.println("CREATE GROUND");
+
         return groundEntities;
     }
 
-    public TiledMap getMap() {
-        return map;
-    }
+    public Entity createExit () {
+        Entity entity = new Entity();
 
-    public Array<Body> getMapTiles() {
-        return mapTiles;
-    }
+        BodyComponent body = engine.createComponent(BodyComponent.class);
+        TransformComponent position = engine.createComponent(TransformComponent.class);
+        TextureComponent texture = engine.createComponent(TextureComponent.class);
+        TypeComponent type = engine.createComponent(TypeComponent.class);
+        MapExitComponent exit = engine.createComponent(MapExitComponent.class);
+        MapObjectComponent object = engine.createComponent(MapObjectComponent.class);
 
-    public Array<Body> getGroundTiles() {
-        return mapGround;
-    }
+        final Rectangle rectangle = map.getLayers().get(MAP_EXIT).getObjects().getByType(RectangleMapObject.class).get(0).getRectangle();
 
-    public Array<Body> getDoors() {
-        return mapDoors;
+        body.body = bodyFactory.makeBoxPolyBody(
+                new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
+                new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), // size
+                BodyDef.BodyType.DynamicBody, world, 0, true);
+
+        body.body.setSleepingAllowed(false);
+
+        position.position.set(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2, 0);
+        type.type = TypeComponent.OBJECT;
+
+        entity.add(body);
+        entity.add(position);
+        entity.add(texture);
+        entity.add(type);
+        entity.add(object);
+        entity.add(exit);
+
+        engine.addEntity(entity);
+
+        System.out.println("CREATE EXIT");
+
+        return entity;
     }
 
     @Override
