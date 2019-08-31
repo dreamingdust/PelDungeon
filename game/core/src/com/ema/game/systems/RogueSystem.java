@@ -182,9 +182,6 @@ public class RogueSystem extends EntitySystem {
                 if (rogue.stabRemainingCD == 0) {
                     if (rogue.spell != 2) {
                         stab.setStyle(stabClickedStyle);
-
-                        System.out.println(stab.getStyle().imageUp);
-
                         rogue.spell = rogue.STAB;
                         components.playerMapper.get(player).spellInQueue = true;
 

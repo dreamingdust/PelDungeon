@@ -154,36 +154,11 @@ public class WarriorSystem extends EntitySystem {
         armorUp = new ImageButton(armorUpNormalState);
 
 
-        rend.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (warrior.rendRemainingCD == 0) {
-                    if (warrior.spell != 1) {
-                        rend.setStyle(rendClickedStyle);
-                        warrior.spell = warrior.REND;
-                        components.playerMapper.get(player).spellInQueue = true;
-
-                        if (warrior.bashRemainingCD == 0) {
-                            bash.setStyle(bashNormalState);
-                        }
-                        if (warrior.executeRemainingCD == 0) {
-                            execute.setStyle(executeNormalState);
-                        }
-                        if (warrior.armorUpRemainingCD == 0) {
-                            armorUp.setStyle(armorUpNormalState);
-                        }
-                    } else {
-                        resetButton(rend, rendNormalState);
-                    }
-                }
-            }
-        });
         bash.addListener(new ClickListener() {
-
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (warrior.bashRemainingCD == 0) {
-                    if (warrior.spell != 2) {
+                    if (warrior.spell != 1) {
                         bash.setStyle(bashClickedStyle);
                         warrior.spell = warrior.BASH;
                         components.playerMapper.get(player).spellInQueue = true;
@@ -199,6 +174,31 @@ public class WarriorSystem extends EntitySystem {
                         }
                     } else {
                         resetButton(bash, bashNormalState);
+                    }
+                }
+            }
+        });
+        rend.addListener(new ClickListener() {
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (warrior.rendRemainingCD == 0) {
+                    if (warrior.spell != 2) {
+                        rend.setStyle(rendClickedStyle);
+                        warrior.spell = warrior.REND;
+                        components.playerMapper.get(player).spellInQueue = true;
+
+                        if (warrior.bashRemainingCD == 0) {
+                            bash.setStyle(bashNormalState);
+                        }
+                        if (warrior.executeRemainingCD == 0) {
+                            execute.setStyle(executeNormalState);
+                        }
+                        if (warrior.armorUpRemainingCD == 0) {
+                            armorUp.setStyle(armorUpNormalState);
+                        }
+                    } else {
+                        resetButton(rend, rendNormalState);
                     }
                 }
             }

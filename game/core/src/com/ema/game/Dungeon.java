@@ -13,6 +13,12 @@ public class Dungeon extends com.badlogic.gdx.Game {
     private ChooseHeroScreen chooseHeroScreen;
     private MainScreen mainScreen;
 
+    private DatabaseHelper dbHelper;
+
+    public Dungeon(DatabaseHelper dbHelper) {
+        this.dbHelper = dbHelper;
+    }
+
     public GameAssetManager assetManager;
     public void create () {
         assetManager = new GameAssetManager();
