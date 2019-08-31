@@ -102,13 +102,7 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
 
             components.enemyMapper.get(enemy).hitLast = false;
 
-            System.out.println(components.bodyMapper.get(enemy).body);
-            System.out.println(components.bodyMapper.get(enemy).body.getFixtureList());
-            System.out.println("...................");
-
             if (components.bodyMapper.get(enemy).body.getFixtureList().get(0).testPoint(tp.x, tp.y)){
-                System.out.println("Enemy touched");
-
                 touchedEnemy = true;
                 if (components.playerMapper.get(player).spellInQueue) {
                     if (components.warriorMapper.has(player)) {
@@ -204,7 +198,6 @@ public class TouchController extends ApplicationAdapter implements InputProcesso
         if (button != Input.Buttons.LEFT || pointer > 0) return false;
         camera.unproject(tp.set(screenX, screenY, 0));
         dragging = false;
-        System.out.println(player);
         player.getComponent(BodyComponent.class).body.setLinearVelocity(0, 0);
         return true;
     }

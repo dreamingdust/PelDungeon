@@ -7,16 +7,22 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.ema.game.components.ArmorComponent;
+import com.ema.game.components.PotionComponent;
+import com.ema.game.components.WeaponComponent;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Random;
 
 public class AndroidDatabaseHelper extends SQLiteOpenHelper implements com.ema.game.DatabaseHelper {
 
     private static final String DATABASE_NAME = "Items.db";
     private static final int DATABASE_VERSION = 1;
     private Context context;
+    Random rand = new Random(System.currentTimeMillis());
 
     /*-----------------------------------------------WEAPONS-----------------------------------------------*/
 
@@ -25,7 +31,7 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper implements com.ema.g
     public final static String COL_2 = "NAME";
     public final static String COL_3 = "BASE_STRENGTH";
     public final static String COL_4 = "ACCURACY";
-    public final static String COL_5 = "DELAY";
+    public final static String COL_5 = "LEVEL";
 
     /*-----------------------------------------------ARMORS-----------------------------------------------*/
 
@@ -56,57 +62,33 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper implements com.ema.g
 
 
 //        SQLiteDatabase db = this.getWritableDatabase();
-        SQLiteDatabase db = this.getReadableDatabase();
 
 //        if (context.deleteDatabase())
-
-        System.out.println("Before adding");
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_MELEE, null);
-
-        if (cursor.moveToFirst()) {
-            System.out.println(cursor.getInt(0));
-            System.out.println(cursor.getString(1));
-            System.out.println(cursor.getInt(2));
+        if (context.getDatabasePath(DATABASE_NAME).exists()) {
+            context.deleteDatabase(DATABASE_NAME);
         }
+
+
+        SQLiteDatabase db = this.getReadableDatabase();
 
 
         addWeaponsMelee(db);
         addArmors(db);
         addPotions(db);
         addScrolls(db);
-
-        System.out.println("After adding");
-        cursor = db.rawQuery("SELECT * FROM " + TABLE_MELEE, null);
-
-        if (cursor.moveToNext()) {
-            cursor.moveToNext();
-            System.out.println(cursor.getInt(0));
-            System.out.println(cursor.getString(1));
-            System.out.println(cursor.getInt(2));
-        }
-
-        System.out.println(db.getPath());
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        System.out.println("Inside on Create");
-
-        db.execSQL("CREATE TABLE " + TABLE_MELEE + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT, BASE_STRENGTH INTEGER, ACCURACY REAL)");
+        db.execSQL("CREATE TABLE " + TABLE_MELEE + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT, BASE_STRENGTH INTEGER, ACCURACY REAL, LEVEL INTEGER)");
         db.execSQL("CREATE TABLE " + TABLE_ARMORS + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT, LEVEL INTEGER, ARMOR INTEGER, BONUS_HP INTEGER)");
         db.execSQL("CREATE TABLE " + TABLE_SCROLLS + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT, VALUE REAL)");
-        db.execSQL("CREATE TABLE " + TABLE_POTIONS + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT, VALUE REAL)");
-
-        System.out.println("Before table add");
+        db.execSQL("CREATE TABLE " + TABLE_POTIONS + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TXT, HEALTH INTEGER, STRENGTH INTEGER, ARMOR INTEGER)");
 
         addWeaponsMelee(db);
         addArmors(db);
         addPotions(db);
         addScrolls(db);
-
-
-
-        System.out.println("Finished on Create");
     }
 
     @Override
@@ -126,20 +108,18 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper implements com.ema.g
 
         try {
             line = bufferedReader.readLine();
-            System.out.println(line);
-
 
             while ((line = bufferedReader.readLine()) != null) {
                 String[] columns = line.split(",");
-                if (columns.length != 4) {
+                if (columns.length != 5) {
                     Log.d("allWeaponMelee", "Skipping Bad CSV Row");
                     continue;
                 }
-                System.out.println("..........................................................");
                 ContentValues contentValues = new ContentValues();
                 contentValues.put("NAME", columns[1].trim());
                 contentValues.put("BASE_STRENGTH", columns[2].trim());
                 contentValues.put("ACCURACY", columns[3].trim());
+                contentValues.put("LEVEL", columns[4].trim());
                 db.insert(TABLE_MELEE, null, contentValues);
             }
         } catch (IOException e) {
@@ -154,7 +134,6 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper implements com.ema.g
         String line;
         db.beginTransaction();
 
-        System.out.println("Creating Armors");
         try {
             while ((line = bufferedReader.readLine()) != null) {
                 String[] columns = line.split(",");
@@ -167,8 +146,6 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper implements com.ema.g
                 contentValues.put("LEVEL", columns[2].trim());
                 contentValues.put("ARMOR", columns[3].trim());
                 contentValues.put("BONUS_HP", columns[4].trim());
-                System.out.println("..........................................................");
-                System.out.println("..........................................................");
                 db.insert(TABLE_ARMORS, null, contentValues);
             }
         } catch (IOException e) {
@@ -186,13 +163,15 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper implements com.ema.g
         try {
             while ((line = bufferedReader.readLine()) != null) {
                 String[] columns = line.split(",");
-                if (columns.length != 3) {
+                if (columns.length != 5) {
                     Log.d("allPotions", "Skipping Bad CSV Row");
                     continue;
                 }
                 ContentValues contentValues = new ContentValues();
                 contentValues.put("NAME", columns[1].trim());
-                contentValues.put("VALUE", columns[2].trim());
+                contentValues.put("HEALTH", columns[2].trim());
+                contentValues.put("STRENGTH", columns[3].trim());
+                contentValues.put("ARMOR", columns[4].trim());
                 db.insert(TABLE_POTIONS, null, contentValues);
             }
         } catch (IOException e) {
@@ -238,5 +217,56 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper implements com.ema.g
             System.out.println(csvPath);
         }
         return null;
+    }
+
+    public WeaponComponent getWeapon() {
+        WeaponComponent weapon = new WeaponComponent();
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_MELEE, null);
+
+        if (cursor.moveToPosition(rand.nextInt(cursor.getCount()))) {
+            weapon.id = cursor.getInt(0);
+            weapon.name = cursor.getString(1);
+            weapon.base_strength = cursor.getInt(2);
+        }
+
+        cursor.close();
+
+        return weapon;
+    }
+
+    public ArmorComponent getArmor() {
+        ArmorComponent armor = new ArmorComponent();
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_ARMORS, null);
+
+        if (cursor.moveToPosition(rand.nextInt(cursor.getCount()))) {
+            armor.id = cursor.getInt(0);
+            armor.name = cursor.getString(1);
+            armor.level = cursor.getInt(2);
+            armor.armor = cursor.getInt(3);
+            armor.bonus_hp = cursor.getInt(4);
+        }
+        cursor.close();
+        return armor;
+    }
+
+    public PotionComponent getPotion() {
+        PotionComponent potion = new PotionComponent();
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_POTIONS, null);
+
+        if (cursor.moveToPosition(rand.nextInt(cursor.getCount()))) {
+            potion.id = cursor.getInt(0);
+            potion.name = cursor.getString(1);
+            potion.health = cursor.getInt(2);
+            potion.strength = cursor.getInt(3);
+            potion.armor = cursor.getInt(4);
+        }
+        cursor.close();
+        return potion;
     }
 }

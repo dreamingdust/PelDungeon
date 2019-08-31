@@ -22,6 +22,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -73,6 +74,7 @@ public class MainScreen implements Screen {
     private Array<Entity> enemyEntities;
     private Array<Entity> objectEntities;
     private Array<Entity> groundEntities;
+    private Array<Entity> itemEntities;
     private ComponentMapperWrapper components;
     private Family renderFamily;
     private Vector3 playerPosition;
@@ -88,12 +90,13 @@ public class MainScreen implements Screen {
     private ArrayList<Label> skillCDLabels;
 
     private Table skillSet;
+    private Table bagSet;
+    private ImageButton bag;
 
-    Random rand;
+    private Random rand;
+    private int dungeonLevel = 0;
 
     public MainScreen(Dungeon game, int playerClass) {
-
-        // TODO: Change orientation? What happens? Can it work without any issues? Research needed.
 
         parent = game;
         camera = new OrthographicCamera();
@@ -128,17 +131,14 @@ public class MainScreen implements Screen {
         mapBodyBuilder = new MapBodyBuilder(world, engine);
         stage = new Stage();
 
+        dungeonLevel++;
+
         inputMultiplexer = new InputMultiplexer();
 
         objectEntities = mapBodyBuilder.createWalls();
         groundEntities = mapBodyBuilder.createGround();
         playerEntity = mapBodyBuilder.createPlayer(playerClass);
-
-
-        playerContainer = playerEntity;
-
-
-
+        itemEntities = mapBodyBuilder.createItems(parent);
         enemyEntities = mapBodyBuilder.createEnemies();
         exitEntity = mapBodyBuilder.createExit();
 
@@ -161,6 +161,10 @@ public class MainScreen implements Screen {
             components.textureMapper.get(enemy).texture = parent.assetManager.manager.get("images/grey_rat.png");
         }
 
+        for (Entity item : itemEntities) {
+            components.bodyMapper.get(item).body.setTransform(components.bodyMapper.get(groundEntities.get(rand.nextInt(groundEntities.size))).body.getPosition(), 0);
+        }
+
         for (Entity object : objectEntities) {
             components.textureMapper.get(object).texture = parent.assetManager.manager.get("images/brick_gray0.png");
         }
@@ -169,8 +173,10 @@ public class MainScreen implements Screen {
             components.textureMapper.get(ground).texture = parent.assetManager.manager.get("images/cobble_blood3.png");
         }
 
-
-
+        if (dungeonLevel == 1) {
+            playerContainer = new Entity();
+            playerContainer.add(new PlayerComponent());
+        }
 
 
         camera.position.set(components.bodyMapper.get(playerEntity).body.getPosition(), 0);
@@ -181,7 +187,7 @@ public class MainScreen implements Screen {
         controller = new TouchController(camera, playerEntity, engine);
 
         engine.addSystem(new CollisionSystem(engine));
-        engine.addSystem(new MovementSystem(controller, engine));
+        engine.addSystem(new MovementSystem(controller, engine, world));
         engine.addSystem(new CombatSystem(engine, world));
 
 
@@ -213,11 +219,11 @@ public class MainScreen implements Screen {
         stage.addActor(enemyHealthBarText);
 
 
-        playerDamageTaken = new Label("TestTestTest", skin);
-        playerDamageTaken.setPosition(components.bodyMapper.get(playerEntity).body.getPosition().x, components.bodyMapper.get(playerEntity).body.getPosition().y);
-        playerDamageTaken.setColor(1f, 0f, 0f, 1f);
-        playerDamageTaken.addAction(Actions.sequence(Actions.delay(1f), Actions.fadeOut(2f)));
-        stage.addActor(playerDamageTaken);
+//        playerDamageTaken = new Label("TestTestTest", skin);
+//        playerDamageTaken.setPosition(components.bodyMapper.get(playerEntity).body.getPosition().x, components.bodyMapper.get(playerEntity).body.getPosition().y);
+//        playerDamageTaken.setColor(1f, 0f, 0f, 1f);
+//        playerDamageTaken.addAction(Actions.sequence(Actions.delay(1f), Actions.fadeOut(2f)));
+//        stage.addActor(playerDamageTaken);
 
 
         HashMap<String, Texture> skillSetTextures = new HashMap<>();
@@ -247,12 +253,12 @@ public class MainScreen implements Screen {
             skillSetTextures.put("ENVENOM", parent.assetManager.manager.get("images/poison_w_backg.png"));
             skillSetTextures.put("STAB", parent.assetManager.manager.get("images/dagger_w_backg.png"));
             skillSetTextures.put("DOUBLE_STRIKE", parent.assetManager.manager.get("images/sword_w_backg.png"));
-            skillSetTextures.put("VANISH", parent.assetManager.manager.get("images/shield_w_backg.png"));
+            skillSetTextures.put("VANISH", parent.assetManager.manager.get("images/chain_mace_w_backg.png"));
 
             skillSetTextures.put("ENVENOM_BG", parent.assetManager.manager.get("images/poison_backg.png"));
             skillSetTextures.put("STAB_BG", parent.assetManager.manager.get("images/dagger_backg.png"));
             skillSetTextures.put("DOUBLE_STRIKE_BG", parent.assetManager.manager.get("images/sword_backg.png"));
-            skillSetTextures.put("VANISH_BG", parent.assetManager.manager.get("images/shield_backg.png"));
+            skillSetTextures.put("VANISH_BG", parent.assetManager.manager.get("images/chain_mace_backg.png"));
 
             skillSet = engine.getSystem(RogueSystem.class).updateUI(skillSetTextures);
         }
@@ -269,6 +275,17 @@ public class MainScreen implements Screen {
         }
 
 
+//        bagSet = new Table();
+////        bagSet.setPosition();
+//        bagSet.setSize(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f);
+//        bagSet.setDebug(true);
+//
+//        stage.addActor(bagSet);
+//
+//        bag = new ImageButton(skin);
+
+
+
         renderFamily = Family.all(TextureComponent.class).exclude(PlayerComponent.class).get();
 
 
@@ -276,6 +293,25 @@ public class MainScreen implements Screen {
         inputMultiplexer.addProcessor(controller);
         Gdx.input.setInputProcessor(inputMultiplexer);
 
+    }
+
+    private void updatePlayerEntity (Entity playerCurrent, Entity player) {
+        PlayerComponent playerComponent = components.playerMapper.get(player);
+        PlayerComponent playerCurrentComponent = components.playerMapper.get(playerCurrent);
+
+        playerComponent.hasStrengthBuff = playerCurrentComponent.hasStrengthBuff;
+        playerComponent.strengthBuffDuration = playerCurrentComponent.strengthBuffDuration;
+        playerComponent.strengthBuffValue = playerCurrentComponent.strengthBuffValue;
+        playerComponent.hasArmorBuff = playerCurrentComponent.hasArmorBuff;
+        playerComponent.armorBuffDuration = playerCurrentComponent.armorBuffDuration;
+        playerComponent.armorBuffValue = playerCurrentComponent.armorBuffValue;
+        playerComponent.health = playerCurrentComponent.health;
+        playerComponent.maxHealth = playerCurrentComponent.maxHealth;
+        playerComponent.strength = playerCurrentComponent.strength;
+        playerComponent.level = playerCurrentComponent.level;
+        playerComponent.xp = playerCurrentComponent.xp;
+        playerComponent.xpForLevel = playerCurrentComponent.xpForLevel;
+        playerComponent.playerClass = playerCurrentComponent.playerClass;
     }
 
     @Override
@@ -290,7 +326,9 @@ public class MainScreen implements Screen {
         engine.update(delta);
 
         if (components.playerMapper.get(playerEntity).onExit) {
+            updatePlayerEntity(playerEntity, playerContainer);
             newMap();
+            updatePlayerEntity(playerContainer, playerEntity);
             components.playerMapper.get(playerEntity).onExit = false;
         }
 
@@ -330,7 +368,7 @@ public class MainScreen implements Screen {
         }
 
         playerPosition = camera.project(new Vector3(components.bodyMapper.get(playerEntity).body.getPosition(), 0));
-        playerDamageTaken.setPosition(playerPosition.x, playerPosition.y);
+//        playerDamageTaken.setPosition(playerPosition.x, playerPosition.y);
 
         // 1 for Warrior, 2 for Rogue
         if (playerClass == 1) {
@@ -345,6 +383,10 @@ public class MainScreen implements Screen {
 
         stage.act();
         stage.draw();
+
+        if (engine.getSystem(CombatSystem.class).checkPlayer(playerEntity)) {
+            parent.changeScreen(Dungeon.GameScreen.GAME_OVER, 0);
+        }
 
         camera = controller.getCamera();
 

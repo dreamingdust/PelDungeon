@@ -2,6 +2,7 @@ package com.ema.game;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -12,20 +13,24 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.ema.game.components.ArmorComponent;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.CombatComponent;
 import com.ema.game.components.EnemyComponent;
+import com.ema.game.components.ItemComponent;
 import com.ema.game.components.MapExitComponent;
 import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.MapObjectComponent;
 import com.ema.game.components.MovementComponent;
 import com.ema.game.components.PlayerComponent;
+import com.ema.game.components.PotionComponent;
 import com.ema.game.components.RogueComponent;
 import com.ema.game.components.TextureComponent;
 import com.ema.game.components.TransformComponent;
 import com.ema.game.components.TypeComponent;
 import com.ema.game.components.WarriorComponent;
+import com.ema.game.components.WeaponComponent;
 
 import java.util.Random;
 
@@ -36,6 +41,7 @@ public class MapBodyBuilder implements Disposable {
     private static final String MAP_PLAYER = "player";
     private static final String MAP_ENEMY = "enemies";
     private static final String MAP_GROUND = "ground";
+    private static final String MAP_ITEM = "items";
     private static final String MAP_EXIT = "exit";
 
     private World world;
@@ -48,14 +54,10 @@ public class MapBodyBuilder implements Disposable {
     public MapBodyBuilder(World world, PooledEngine engine) {
         this.world = world;
         this.engine = engine;
-        String mapName = "map/map" + (rand.nextInt(3)+1) + ".tmx";
+        String mapName = "map/map" + (rand.nextInt(2)+1) + ".tmx";
         map = new TmxMapLoader().load(mapName);
+        System.out.println(mapName);
         bodyFactory = BodyFactory.getInstance(world);
-    }
-
-    public void updateBuilder() {
-        String mapName = "map/map" + (rand.nextInt(3)+1) + ".tmx";
-        map = new TmxMapLoader().load(mapName);
     }
 
     public Entity createPlayer(int playerClass) {
@@ -193,8 +195,6 @@ public class MapBodyBuilder implements Disposable {
             engine.addEntity(entity);
         }
 
-        System.out.println("CREATE WALLS");
-
         return objectEntities;
     }
 
@@ -232,8 +232,6 @@ public class MapBodyBuilder implements Disposable {
             engine.addEntity(entity);
         }
 
-        System.out.println("CREATE GROUND");
-
         return groundEntities;
     }
 
@@ -268,9 +266,64 @@ public class MapBodyBuilder implements Disposable {
 
         engine.addEntity(entity);
 
-        System.out.println("CREATE EXIT");
-
         return entity;
+    }
+
+    public Array<Entity> createItems (Dungeon parent) {
+        Array<Entity> groundEntities = new Array<>();
+
+        Array<RectangleMapObject> groundTiles = map.getLayers().get(MAP_ITEM).getObjects().getByType(RectangleMapObject.class);
+        for (RectangleMapObject rObject : new Array.ArrayIterator<>(groundTiles)) {
+            Rectangle rectangle = rObject.getRectangle();
+
+            Entity entity = engine.createEntity();
+            BodyComponent body = engine.createComponent(BodyComponent.class);
+            TransformComponent position = engine.createComponent(TransformComponent.class);
+            TextureComponent texture = engine.createComponent(TextureComponent.class);
+            TypeComponent type = engine.createComponent(TypeComponent.class);
+            ItemComponent item = engine.createComponent(ItemComponent.class);
+            MapObjectComponent object = engine.createComponent(MapObjectComponent.class);
+
+            switch (rand.nextInt(3)) {
+                case 0:
+                    WeaponComponent weapon = parent.getDbHelper().getWeapon();
+                    texture.texture = parent.assetManager.manager.get("images/sabre1_silver.png");
+                    entity.add(weapon);
+                    break;
+                case 1:
+                    ArmorComponent armor = parent.getDbHelper().getArmor();
+                    texture.texture = parent.assetManager.manager.get("images/elven_scalemail.png");
+                    entity.add(armor);
+                    break;
+                case 2:
+                    PotionComponent potion = parent.getDbHelper().getPotion();
+                    texture.texture = parent.assetManager.manager.get("images/magenta.png");
+                    entity.add(potion);
+                    break;
+            }
+
+            body.body = bodyFactory.makeBoxPolyBody(
+                    new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2), // position
+                    new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), // size
+                    BodyDef.BodyType.StaticBody, world,4, true);
+
+            body.body.setSleepingAllowed(true);
+
+            position.position.set(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2, 0);
+            type.type = TypeComponent.OBJECT;
+
+            entity.add(body);
+            entity.add(position);
+            entity.add(texture);
+            entity.add(type);
+            entity.add(object);
+            entity.add(item);
+
+            groundEntities.add(entity);
+            engine.addEntity(entity);
+        }
+
+        return groundEntities;
     }
 
     @Override

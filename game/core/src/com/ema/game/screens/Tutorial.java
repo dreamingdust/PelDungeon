@@ -1,35 +1,44 @@
 package com.ema.game.screens;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
-import com.ema.game.Dungeon;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.ema.game.Dungeon;
 
-import static com.ema.game.Dungeon.GameScreen.CHOOSE_HERO;
+import static com.ema.game.Dungeon.GameScreen.MENU;
 
-public class MenuScreen implements Screen{
-
+public class Tutorial implements Screen {
     private Dungeon parent;
     private Stage stage;
     private Skin skin;
 
-    public MenuScreen(Dungeon game){
+    String tutorial;
+
+    public Tutorial (Dungeon game) {
         parent = game;
 
         /// create stage and set it as input processor
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+
+        tutorial = new String("How to move? \n" +
+                "Touch the sides of the display to move in the respective direction. \n" +
+                "Movement to walls is not possible and you have to find your way through the dungeon fighting monsters and improving your character. \n" +
+                "You have a choice between two classes - Warrior and Rogue. Both classes have a set of four abilities which have different effects. \n" +
+                "The Warrior has Bash that does small amount of damage and stuns the enemy for two rounds. \n" +
+                "The next two skills do moderate damage and the last one increases her armor. \n" +
+                "The Rogue can increase his own strength with envenom and do high amount of damage with his two middle abilities.\n" +
+                "His last ability stuns the enemys for three rounds.");
     }
 
     @Override
@@ -45,48 +54,30 @@ public class MenuScreen implements Screen{
 
         skin = parent.assetManager.manager.get("skin/craftacular-ui.json");
 
-        //create buttons
-        TextButton newGame = new TextButton("Start", skin);
-        TextButton chooseHero = new TextButton("Tutorial", skin);
-        TextButton exit = new TextButton("Exit", skin);
 
-        newGame.getLabel().setFontScale(1.5f, 1.5f);
-        chooseHero.getLabel().setFontScale(1.5f, 1.5f);
-        exit.getLabel().setFontScale(1.5f, 1.5f);
+        //create buttons
+        TextButton gameOver = new TextButton(tutorial, skin);
+        gameOver.setDisabled(true);
+
+        TextButton startOver = new TextButton("Go to menu", skin);
 
         //add buttons to table
-        table.add(newGame).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
+        table.add(gameOver).fillX().uniformX().size(Gdx.graphics.getWidth()*0.4f, Gdx.graphics.getHeight()*0.3f);
         table.row().pad(10, 0, 10, 0);
-        table.add(chooseHero).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
-        table.row().pad(0, 0, 10, 0);
-        table.add(exit).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
+        table.add(startOver).fillX().uniformX().size(Gdx.graphics.getWidth()*0.2f, Gdx.graphics.getHeight()*0.1f);
+        table.row().pad(10, 0, 10, 0);
 
-        // create button listeners
-        exit.addListener(new ChangeListener() {
+        startOver.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.exit();
+                parent.changeScreen(MENU, 0);
             }
         });
-
-        newGame.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                parent.changeScreen(CHOOSE_HERO, 0);
-            }
-        });
-
-        chooseHero.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-//                parent.changeScreen();
-            }
-        });
-
     }
 
     @Override
     public void render(float delta) {
+
         // clear the screen ready for next set of images to be drawn
         Gdx.gl.glClearColor(0f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -98,32 +89,26 @@ public class MenuScreen implements Screen{
 
     @Override
     public void resize(int width, int height) {
-        // change the stage's viewport when teh screen size is changed
-        stage.getViewport().update(width, height, true);
+
     }
 
     @Override
     public void pause() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void resume() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void hide() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void dispose() {
-        // dispose of assets when not needed anymore
-        stage.dispose();
-    }
 
+    }
 }

@@ -50,7 +50,6 @@ public class CombatSystem extends IteratingSystem {
 
     public void updateSpellCombat(Entity player, Entity enemy, int spellValue, int duration, boolean isDebuff, boolean isStun) {
         if (components.combatMapper.get(player).inCombat && components.combatMapper.get(enemy).inCombat) {
-            System.out.println("Why am I here?");
             if (isDebuff) {
                 components.enemyMapper.get(enemy).hasDebuff = true;
                 components.enemyMapper.get(enemy).dotValue = spellValue;
@@ -104,6 +103,13 @@ public class CombatSystem extends IteratingSystem {
         } else if (components.rogueMapper.has(player)) {
             engine.getSystem(RogueSystem.class).decrementCooldowns();
         }
+    }
+
+    public boolean checkPlayer(Entity player) {
+        if (components.playerMapper.get(player).health <= 0) {
+            return true;
+        }
+        return false;
     }
 
     private void checkEnemy(Entity player, Entity enemy) {

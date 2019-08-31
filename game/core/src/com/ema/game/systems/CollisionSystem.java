@@ -51,31 +51,22 @@ public class CollisionSystem extends EntitySystem {
 
                     if (components.mapExitMapper.has(object) && components.playerMapper.has(entity)) {
                         components.playerMapper.get(entity).nearExit = true;
+                    } else if (components.itemMapper.has(object) && components.playerMapper.has(entity)) {
+                        components.playerMapper.get(entity).nearItem = true;
+                        System.out.println("FLAGINCOLLISION");
                     } else {
-                            if (components.bodyMapper.get(object).body.getFixtureList().get(0).testPoint(components.bodyMapper.get(entity).body.getPosition().x, components.bodyMapper.get(entity).body.getPosition().y + 0.32f)) {
-                                components.collisionMapper.get(entity).object_collision_up = true;
-                                if (components.playerMapper.has(entity)) {
-                                    System.out.println("Collision up");
-                                }
-                            }
-                            if (components.bodyMapper.get(object).body.getFixtureList().get(0).testPoint(components.bodyMapper.get(entity).body.getPosition().x, components.bodyMapper.get(entity).body.getPosition().y - 0.32f)) {
-                                components.collisionMapper.get(entity).object_collision_down = true;
-                                if (components.playerMapper.has(entity)) {
-                                    System.out.println("Collision down");
-                                }
-                            }
-                            if (components.bodyMapper.get(object).body.getFixtureList().get(0).testPoint(components.bodyMapper.get(entity).body.getPosition().x + 0.32f, components.bodyMapper.get(entity).body.getPosition().y)) {
-                                components.collisionMapper.get(entity).object_collision_right = true;
-                                if (components.playerMapper.has(entity)) {
-                                    System.out.println("Collision right");
-                                }
-                            }
-                            if (components.bodyMapper.get(object).body.getFixtureList().get(0).testPoint(components.bodyMapper.get(entity).body.getPosition().x - 0.32f, components.bodyMapper.get(entity).body.getPosition().y)) {
-                                components.collisionMapper.get(entity).object_collision_left = true;
-                                if (components.playerMapper.has(entity)) {
-                                    System.out.println("Collision left");
-                                }
-                            }
+                        if (components.bodyMapper.get(object).body.getFixtureList().get(0).testPoint(components.bodyMapper.get(entity).body.getPosition().x, components.bodyMapper.get(entity).body.getPosition().y + 0.32f)) {
+                            components.collisionMapper.get(entity).object_collision_up = true;
+                        }
+                        if (components.bodyMapper.get(object).body.getFixtureList().get(0).testPoint(components.bodyMapper.get(entity).body.getPosition().x, components.bodyMapper.get(entity).body.getPosition().y - 0.32f)) {
+                            components.collisionMapper.get(entity).object_collision_down = true;
+                        }
+                        if (components.bodyMapper.get(object).body.getFixtureList().get(0).testPoint(components.bodyMapper.get(entity).body.getPosition().x + 0.32f, components.bodyMapper.get(entity).body.getPosition().y)) {
+                            components.collisionMapper.get(entity).object_collision_right = true;
+                        }
+                        if (components.bodyMapper.get(object).body.getFixtureList().get(0).testPoint(components.bodyMapper.get(entity).body.getPosition().x - 0.32f, components.bodyMapper.get(entity).body.getPosition().y)) {
+                            components.collisionMapper.get(entity).object_collision_left = true;
+                        }
                     }
                 }
             }

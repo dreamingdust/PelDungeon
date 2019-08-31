@@ -79,7 +79,7 @@ public class WarriorSystem extends EntitySystem {
             } else if (warrior.spell == warrior.ARMORUP && warrior.armorUpRemainingCD == 0) {
                 if (!components.playerMapper.get(player).hasArmorBuff) {
                     components.playerMapper.get(player).armor += warrior.armorUpValue;
-                    components.playerMapper.get(player).buffValue = warrior.armorUpValue;
+                    components.playerMapper.get(player).armorBuffValue = warrior.armorUpValue;
                     components.playerMapper.get(player).armorBuffDuration = warrior.armorUpDuration;
                     components.playerMapper.get(player).hasArmorBuff = true;
                 } else {

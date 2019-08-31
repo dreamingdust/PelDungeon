@@ -17,14 +17,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import static com.ema.game.Dungeon.GameScreen.CHOOSE_HERO;
+import static com.ema.game.Dungeon.GameScreen.MENU;
 
-public class MenuScreen implements Screen{
+public class GameOverScreen implements Screen{
 
     private Dungeon parent;
     private Stage stage;
     private Skin skin;
 
-    public MenuScreen(Dungeon game){
+    public GameOverScreen(Dungeon game){
         parent = game;
 
         /// create stage and set it as input processor
@@ -46,42 +47,24 @@ public class MenuScreen implements Screen{
         skin = parent.assetManager.manager.get("skin/craftacular-ui.json");
 
         //create buttons
-        TextButton newGame = new TextButton("Start", skin);
-        TextButton chooseHero = new TextButton("Tutorial", skin);
-        TextButton exit = new TextButton("Exit", skin);
+        TextButton gameOver = new TextButton("GAME OVER", skin);
+        gameOver.setDisabled(true);
 
-        newGame.getLabel().setFontScale(1.5f, 1.5f);
-        chooseHero.getLabel().setFontScale(1.5f, 1.5f);
-        exit.getLabel().setFontScale(1.5f, 1.5f);
+        TextButton startOver = new TextButton("Go to menu", skin);
 
         //add buttons to table
-        table.add(newGame).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
+        table.add(gameOver).fillX().uniformX().size(Gdx.graphics.getWidth()*0.4f, Gdx.graphics.getHeight()*0.3f);
         table.row().pad(10, 0, 10, 0);
-        table.add(chooseHero).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
-        table.row().pad(0, 0, 10, 0);
-        table.add(exit).fillX().uniformX().size(Gdx.graphics.getWidth()*0.3f, Gdx.graphics.getHeight()*0.1f);
+        table.add(startOver).fillX().uniformX().size(Gdx.graphics.getWidth()*0.2f, Gdx.graphics.getHeight()*0.1f);
+        table.row().pad(10, 0, 10, 0);
 
-        // create button listeners
-        exit.addListener(new ChangeListener() {
+        startOver.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.exit();
+                parent.changeScreen(MENU, 0);
             }
         });
 
-        newGame.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                parent.changeScreen(CHOOSE_HERO, 0);
-            }
-        });
-
-        chooseHero.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-//                parent.changeScreen();
-            }
-        });
 
     }
 

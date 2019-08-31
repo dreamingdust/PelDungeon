@@ -1,8 +1,8 @@
-﻿"ID","NAME","BASE_STRENGTH","ACCURACY"
-"1","Slicer Blade","3","0.95"
-"2","Blackfang","6","0.9"
-"3","Heartseeker","15","0.6"
-"4","Hellreaver","12","0.8"
-"5","Battle Scythe","5","0.95"
-"6","Dragonstrike","9","0.85"
-"7","Staff of Dominance","6","1.0"
+﻿"ID","NAME","BASE_STRENGTH","ACCURACY", "LEVEL"
+"1","Slicer Blade","3","0.95", 1
+"2","Blackfang","6","0.9", 1
+"3","Heartseeker","15","0.6", 3
+"4","Hellreaver","12","0.8", 2
+"5","Battle Scythe","5","0.95", 3
+"6","Dragonstrike","9","0.85", 3
+"7","Staff of Dominance","6","1.0", 2

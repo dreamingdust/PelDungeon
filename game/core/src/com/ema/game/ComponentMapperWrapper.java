@@ -1,20 +1,24 @@
 package com.ema.game;
 
 import com.badlogic.ashley.core.ComponentMapper;
+import com.ema.game.components.ArmorComponent;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.CombatComponent;
 import com.ema.game.components.EnemyComponent;
+import com.ema.game.components.ItemComponent;
 import com.ema.game.components.MapExitComponent;
 import com.ema.game.components.MapGroundComponent;
 import com.ema.game.components.MapObjectComponent;
 import com.ema.game.components.MovementComponent;
 import com.ema.game.components.PlayerComponent;
+import com.ema.game.components.PotionComponent;
 import com.ema.game.components.RogueComponent;
 import com.ema.game.components.TextureComponent;
 import com.ema.game.components.TransformComponent;
 import com.ema.game.components.TypeComponent;
 import com.ema.game.components.WarriorComponent;
+import com.ema.game.components.WeaponComponent;
 
 public class ComponentMapperWrapper {
     private static ComponentMapperWrapper components;
@@ -34,6 +38,12 @@ public class ComponentMapperWrapper {
     public ComponentMapper<RogueComponent> rogueMapper;
     public ComponentMapper<MapExitComponent> mapExitMapper;
 
+    public ComponentMapper<ItemComponent> itemMapper;
+    public ComponentMapper<WeaponComponent> weaponMapper;
+    public ComponentMapper<ArmorComponent> armorMapper;
+    public ComponentMapper<PotionComponent> potionMapper;
+
+
 
     private ComponentMapperWrapper() {
         bodyMapper = ComponentMapper.getFor(BodyComponent.class);
@@ -50,6 +60,11 @@ public class ComponentMapperWrapper {
         warriorMapper = ComponentMapper.getFor(WarriorComponent.class);
         rogueMapper = ComponentMapper.getFor(RogueComponent.class);
         mapExitMapper = ComponentMapper.getFor(MapExitComponent.class);
+
+        itemMapper = ComponentMapper.getFor(ItemComponent.class);
+        weaponMapper = ComponentMapper.getFor(WeaponComponent.class);
+        armorMapper = ComponentMapper.getFor(ArmorComponent.class);
+        potionMapper = ComponentMapper.getFor(PotionComponent.class);
     }
 
     public static ComponentMapperWrapper getInstance() {

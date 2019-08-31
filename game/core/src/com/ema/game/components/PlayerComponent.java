@@ -10,7 +10,7 @@ public class PlayerComponent implements Component {
     public int playerClass = 0;
 
     public int maxHealth = 50;
-    public int health = 50;
+    public int health = maxHealth;
     public int strength = 5;
     public int armor = 1;
 
@@ -21,7 +21,8 @@ public class PlayerComponent implements Component {
     public boolean spellInQueue = false;
 
     // The player may have only one of each types of spell buffs at a time.
-    public int buffValue = 0;
+    public int armorBuffValue = 0;
+    public int strengthBuffValue = 0;
     public int armorBuffDuration = 0;
     public int strengthBuffDuration = 0;
     public boolean hasArmorBuff = false;
@@ -30,4 +31,6 @@ public class PlayerComponent implements Component {
     public int round = 0;
     public boolean nearExit = false;
     public boolean onExit = false;
+    public boolean nearItem = false;
+    public boolean onItem = false;
 }

@@ -1,26 +1,27 @@
 package com.ema.game;
 
 import com.ema.game.screens.ChooseHeroScreen;
-import com.ema.game.screens.LoadingScreen;
+import com.ema.game.screens.GameOverScreen;
 import com.ema.game.screens.MainScreen;
 import com.ema.game.screens.MenuScreen;
 
 public class Dungeon extends com.badlogic.gdx.Game {
-    public enum GameScreen {MENU, CHOOSE_HERO, APPLICATION}
+    public enum GameScreen {MENU, CHOOSE_HERO, APPLICATION, GAME_OVER}
 
-    private LoadingScreen loadingScreen;
-    private MenuScreen menuScreen;
-    private ChooseHeroScreen chooseHeroScreen;
-    private MainScreen mainScreen;
-
+    public GameAssetManager assetManager;
     private DatabaseHelper dbHelper;
+
 
     public Dungeon(DatabaseHelper dbHelper) {
         this.dbHelper = dbHelper;
     }
 
-    public GameAssetManager assetManager;
+    public DatabaseHelper getDbHelper() {
+        return dbHelper;
+    }
+
     public void create () {
+
         assetManager = new GameAssetManager();
 
         assetManager.queueAddImages();
@@ -28,28 +29,22 @@ public class Dungeon extends com.badlogic.gdx.Game {
 
         assetManager.manager.finishLoading();
 
-        loadingScreen = new LoadingScreen(this);
-        setScreen(loadingScreen);
+        changeScreen(GameScreen.MENU, 0);
     }
 
     public void changeScreen(GameScreen screen, int playerClass){
         switch(screen){
             case MENU:
-                if(menuScreen == null) menuScreen = new MenuScreen(this);
-                this.setScreen(menuScreen);
+                this.setScreen(new MenuScreen(this));
                 break;
             case CHOOSE_HERO:
-                if(chooseHeroScreen == null) {
-                    chooseHeroScreen = new ChooseHeroScreen(this);
-                }
-                this.setScreen(chooseHeroScreen);
+                this.setScreen(new ChooseHeroScreen(this));
                 break;
             case APPLICATION:
-                if(mainScreen == null) {
-                    mainScreen = new MainScreen(this, playerClass);
-                }
-                this.setScreen(mainScreen);
+                this.setScreen(new MainScreen(this, playerClass));
                 break;
+            case GAME_OVER:
+                this.setScreen(new GameOverScreen(this));
         }
     }
 }

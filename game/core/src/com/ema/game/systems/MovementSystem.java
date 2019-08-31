@@ -5,12 +5,13 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.physics.box2d.World;
 import com.ema.game.ComponentMapperWrapper;
 import com.ema.game.components.BodyComponent;
 import com.ema.game.components.CollisionComponent;
 import com.ema.game.components.EnemyComponent;
+import com.ema.game.components.ItemComponent;
 import com.ema.game.components.MapExitComponent;
 import com.ema.game.components.PlayerComponent;
 import com.ema.game.controller.TouchController;
@@ -26,12 +27,15 @@ public class MovementSystem extends EntitySystem {
 
     TouchController controller;
     PooledEngine engine;
+    World world;
     ImmutableArray<Entity> enemies;
     ImmutableArray<Entity> exit;
+    ImmutableArray<Entity> items;
 
     public boolean moveTaken;
     Random rand;
 
+    private PlayerComponent player;
 
     private ComponentMapper<BodyComponent> bodyMapper;
     private ComponentMapper<CollisionComponent> collisionMapper;
@@ -40,13 +44,16 @@ public class MovementSystem extends EntitySystem {
 
     private int direction;
 
-    public MovementSystem(TouchController controller, PooledEngine engine) {
+    public MovementSystem(TouchController controller, PooledEngine engine, World world) {
         this.controller = controller;
         this.engine = engine;
+        this.world = world;
 
         bodyMapper = ComponentMapper.getFor(BodyComponent.class);
         collisionMapper = ComponentMapper.getFor(CollisionComponent.class);
+
         enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
+        items = engine.getEntitiesFor(Family.all(ItemComponent.class).get());
         exit = engine.getEntitiesFor(Family.all(MapExitComponent.class).get());
         components = ComponentMapperWrapper.getInstance();
 
@@ -55,6 +62,9 @@ public class MovementSystem extends EntitySystem {
     }
 
     public void updateMovement(Entity entity) {
+        player = components.playerMapper.get(engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
+        items = engine.getEntitiesFor(Family.all(ItemComponent.class).get());
+
         direction = controller.getMovementDirection();
 
         if (direction != DIRECTION_NONE) {
@@ -78,9 +88,40 @@ public class MovementSystem extends EntitySystem {
             moveTaken = false;
         }
 
-        if (components.playerMapper.get(entity).nearExit) {
+        if (player.nearExit) {
             if (bodyMapper.get(exit.get(0)).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition())) {
-                components.playerMapper.get(entity).onExit = true;
+                player.onExit = true;
+            }
+        }
+
+        if (player.nearItem) {
+            System.out.println("FLAG");
+            for (Entity item : items) {
+                if (bodyMapper.get(item).body.getFixtureList().get(0).testPoint(bodyMapper.get(entity).body.getPosition())) {
+                    if (components.weaponMapper.has(item)) {
+                        System.out.println(components.weaponMapper.get(item).name);
+                        player.strength += components.weaponMapper.get(item).base_strength;
+                    } else if (components.armorMapper.has(item)) {
+                        System.out.println(components.armorMapper.get(item).name);
+
+                        player.armor += components.armorMapper.get(item).armor;
+                        player.maxHealth += components.armorMapper.get(item).bonus_hp;
+                    } else if (components.potionMapper.has(item)) {
+                        System.out.println(components.potionMapper.get(item).name);
+
+                        player.health += components.potionMapper.get(item).health;
+                        if (player.health + components.potionMapper.get(item).health > player.maxHealth) {
+                            player.health = player.maxHealth;
+                        } else {
+                            player.health += components.potionMapper.get(item).health;
+                        }
+                        player.strength += components.potionMapper.get(item).strength;
+                        player.armor += components.potionMapper.get(item).armor;
+                    }
+                    world.destroyBody(components.bodyMapper.get(item).body);
+                    engine.removeEntity(item);
+                    player.nearItem = false;
+                }
             }
         }
 

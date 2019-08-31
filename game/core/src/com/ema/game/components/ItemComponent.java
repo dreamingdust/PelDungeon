@@ -10,4 +10,11 @@ public class ItemComponent implements Component {
     public final int SCROLL_ITEM = 4;
 
     public int item = UNKNOWN_ITEM;
+
+    public int id = 0;
+    public String name = "";
+    public int value = 0;
+    public int bonus_hp = 0;
+    public int armor = 0;
+    public int level = 0;
 }

@@ -42,6 +42,13 @@ public class GameAssetManager {
     private final String POISON_BG_IMAGE = "images/poison_backg.png";
     private final String POISON_IMAGE = "images/poison_w_backg.png";
 
+
+    private final String WEAPON_IMAGE = "images/sabre1_silver.png";
+    private final String ARMOR_IMAGE = "images/elven_scalemail.png";
+    private final String POTION_IMAGE = "images/magenta.png";
+    private final String SCROLL_IMAGE = "images/poison_w_backg.png";
+
+
     private final String SKIN = "skin/craftacular-ui.json";
 
 
@@ -75,7 +82,13 @@ public class GameAssetManager {
 
         manager.load(POISON_BG_IMAGE, Texture.class);
         manager.load(POISON_IMAGE, Texture.class);
-        //manager.load(enemyImage, Texture.class);
+
+
+        manager.load(WEAPON_IMAGE, Texture.class);
+        manager.load(ARMOR_IMAGE, Texture.class);
+        manager.load(POTION_IMAGE, Texture.class);
+
+
     }
 
 

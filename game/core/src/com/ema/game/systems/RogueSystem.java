@@ -68,7 +68,7 @@ public class RogueSystem extends EntitySystem {
             if (rogue.spell == rogue.ENVENOM) {
                 if (!components.playerMapper.get(player).hasStrengthBuff) {
                     components.playerMapper.get(player).strength += rogue.envenomValue;
-                    components.playerMapper.get(player).buffValue = rogue.envenomValue;
+                    components.playerMapper.get(player).strengthBuffValue = rogue.envenomValue;
                     components.playerMapper.get(player).strengthBuffDuration = rogue.envenomDuration;
                     components.playerMapper.get(player).hasStrengthBuff = true;
                 } else {
